@@ -1,0 +1,36 @@
+{
+  "name": "@frontend-guard/runtime",
+  "version": "0.1.0",
+  "description": "Runtime defense for Frontend Guard - ErrorBoundary, global error handling, fetch wrapper",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "keywords": [
+    "react",
+    "error-boundary",
+    "frontend-guard",
+    "runtime"
+  ],
+  "devDependencies": {
+    "@types/react": "^19.2.14"
+  }
+}

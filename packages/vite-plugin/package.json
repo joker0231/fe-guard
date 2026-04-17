@@ -1,0 +1,29 @@
+{
+  "name": "@frontend-guard/vite-plugin",
+  "version": "0.1.0",
+  "description": "Vite plugin for Frontend Guard - L2 cross-file analysis",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "vite": ">=5.0.0"
+  },
+  "dependencies": {
+    "@typescript-eslint/typescript-estree": "^8.0.0",
+    "fast-glob": "^3.3.0"
+  },
+  "keywords": ["vite", "vite-plugin", "frontend-guard", "static-analysis"]
+}

@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.guard-strict.json",
+  "compilerOptions": {
+    "exactOptionalPropertyTypes": true
+  }
+}
