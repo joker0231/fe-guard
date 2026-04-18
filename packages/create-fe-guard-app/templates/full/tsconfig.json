@@ -1,5 +1,5 @@
 {
-  "extends": "@frontend-guard/tsconfig/strict.json",
+  "extends": "fe-guard-tsconfig/tsconfig.guard-base.json",
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,

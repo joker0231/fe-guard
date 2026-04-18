@@ -88,7 +88,7 @@ export const initCommand = new Command('init')
     console.log(chalk.bold('依赖检查'));
 
     const requiredDeps = [
-      '@frontend-guard/eslint-plugin',
+      'eslint-plugin-fe-guard',
       '@typescript-eslint/eslint-plugin',
       'eslint-plugin-react-hooks',
       'eslint-plugin-jsx-a11y',
@@ -165,8 +165,8 @@ export const initCommand = new Command('init')
       const eslintContent = fs.readFileSync(eslintConfigPath, 'utf-8');
 
       // Check if guard is already configured
-      if (eslintContent.includes('@frontend-guard')) {
-        console.log(chalk.dim('  @frontend-guard 已配置 ✓'));
+      if (eslintContent.includes('fe-guard')) {
+        console.log(chalk.dim('  fe-guard 已配置 ✓'));
       } else {
         const isFlatConfig = existingEslintConfig.startsWith('eslint.config');
 
@@ -175,7 +175,7 @@ export const initCommand = new Command('init')
           if (injected) {
             const spinnerEslint = ora('注入 ESLint flat config...').start();
             fs.writeFileSync(eslintConfigPath, injected, 'utf-8');
-            spinnerEslint.succeed(`已自动注入 @frontend-guard 到 ${existingEslintConfig}`);
+            spinnerEslint.succeed(`已自动注入 fe-guard 到 ${existingEslintConfig}`);
           } else {
             printFlatConfigManualGuide(chalk);
           }
@@ -184,7 +184,7 @@ export const initCommand = new Command('init')
           if (injected) {
             const spinnerEslint = ora('注入 .eslintrc.json...').start();
             fs.writeFileSync(eslintConfigPath, injected, 'utf-8');
-            spinnerEslint.succeed(`已自动注入 @frontend-guard 到 ${existingEslintConfig}`);
+            spinnerEslint.succeed(`已自动注入 fe-guard 到 ${existingEslintConfig}`);
           } else {
             printLegacyConfigManualGuide(chalk);
           }
@@ -193,7 +193,7 @@ export const initCommand = new Command('init')
           if (injected) {
             const spinnerEslint = ora(`注入 ${existingEslintConfig}...`).start();
             fs.writeFileSync(eslintConfigPath, injected, 'utf-8');
-            spinnerEslint.succeed(`已自动注入 @frontend-guard 到 ${existingEslintConfig}`);
+            spinnerEslint.succeed(`已自动注入 fe-guard 到 ${existingEslintConfig}`);
           } else {
             printLegacyConfigManualGuide(chalk);
           }
@@ -217,18 +217,18 @@ export const initCommand = new Command('init')
       const tsconfigPath = path.join(cwd, 'tsconfig.json');
       const tsconfigContent = fs.readFileSync(tsconfigPath, 'utf-8');
 
-      if (tsconfigContent.includes('@frontend-guard/tsconfig')) {
-        console.log(chalk.dim('  @frontend-guard/tsconfig 已配置 ✓'));
+      if (tsconfigContent.includes('fe-guard-tsconfig')) {
+        console.log(chalk.dim('  fe-guard-tsconfig 已配置 ✓'));
       } else {
         const injected = injectTsconfig(tsconfigContent);
         if (injected) {
           const spinnerTs = ora('注入 tsconfig 预设...').start();
           fs.writeFileSync(tsconfigPath, injected, 'utf-8');
-          spinnerTs.succeed('已自动注入 @frontend-guard/tsconfig 预设');
+          spinnerTs.succeed('已自动注入 fe-guard-tsconfig 预设');
         } else {
           console.log(chalk.yellow('  无法自动注入 tsconfig 预设，请手动添加:'));
           console.log(chalk.dim('  ─────────────────────────────────────'));
-          console.log(chalk.green(`  "extends": "@frontend-guard/tsconfig/tsconfig.guard-base.json"`));
+          console.log(chalk.green(`  "extends": "fe-guard-tsconfig/tsconfig.guard-base.json"`));
           console.log(chalk.dim('  ─────────────────────────────────────'));
         }
       }
@@ -286,7 +286,7 @@ function injectFlatConfig(content: string): string | null {
   let result = content;
 
   // Add import statement after last import or at top
-  const guardImport = `import guard from '@frontend-guard/eslint-plugin';\n`;
+  const guardImport = `import guard from 'eslint-plugin-fe-guard';\n`;
 
   const lastImportIdx = findLastImportIndex(result);
   if (lastImportIdx >= 0) {
@@ -342,8 +342,8 @@ function injectEslintrcJson(content: string): string | null {
 
     // Add to plugins
     if (!config.plugins) config.plugins = [];
-    if (!config.plugins.includes('@frontend-guard')) {
-      config.plugins.push('@frontend-guard');
+    if (!config.plugins.includes('fe-guard')) {
+      config.plugins.push('fe-guard');
     }
 
     // Add to extends
@@ -351,7 +351,7 @@ function injectEslintrcJson(content: string): string | null {
     if (typeof config.extends === 'string') {
       config.extends = [config.extends];
     }
-    const guardExtend = 'plugin:@frontend-guard/extended';
+    const guardExtend = 'plugin:fe-guard/extended';
     if (!config.extends.includes(guardExtend)) {
       config.extends.push(guardExtend);
     }
@@ -384,10 +384,10 @@ function injectEslintrcJs(content: string): string | null {
   const pluginsMatch = result.match(/plugins\s*:\s*\[([^\]]*)\]/);
   if (pluginsMatch) {
     const existing = pluginsMatch[1];
-    if (!existing.includes('@frontend-guard')) {
+    if (!existing.includes('fe-guard')) {
       const newPlugins = existing.trim()
-        ? `${existing.trimEnd()}, '@frontend-guard'`
-        : `'@frontend-guard'`;
+        ? `${existing.trimEnd()}, 'fe-guard'`
+        : `'fe-guard'`;
       result = result.replace(pluginsMatch[0], `plugins: [${newPlugins}]`);
       modified = true;
     }
@@ -397,7 +397,7 @@ function injectEslintrcJs(content: string): string | null {
   const extendsMatch = result.match(/extends\s*:\s*\[([^\]]*)\]/);
   if (extendsMatch) {
     const existing = extendsMatch[1];
-    const guardExtend = 'plugin:@frontend-guard/extended';
+    const guardExtend = 'plugin:fe-guard/extended';
     if (!existing.includes(guardExtend)) {
       const newExtends = existing.trim()
         ? `${existing.trimEnd()}, '${guardExtend}'`
@@ -431,7 +431,7 @@ function printFlatConfigManualGuide(chalk: any): void {
   console.log(chalk.yellow('  无法自动注入，请手动添加到 ESLint flat config:'));
   console.log('');
   console.log(chalk.dim('  ─────────────────────────────────────'));
-  console.log(chalk.green(`  import guard from '@frontend-guard/eslint-plugin';`));
+  console.log(chalk.green(`  import guard from 'eslint-plugin-fe-guard';`));
   console.log('');
   console.log(chalk.green(`  export default [`));
   console.log(chalk.green(`    ...guard.configs.recommended,`));
@@ -447,8 +447,8 @@ function printLegacyConfigManualGuide(chalk: any): void {
   console.log('');
   console.log(chalk.dim('  ─────────────────────────────────────'));
   console.log(chalk.green(`  {`));
-  console.log(chalk.green(`    "plugins": ["@frontend-guard"],`));
-  console.log(chalk.green(`    "extends": ["plugin:@frontend-guard/extended"],`));
+  console.log(chalk.green(`    "plugins": ["fe-guard"],`));
+  console.log(chalk.green(`    "extends": ["plugin:fe-guard/extended"],`));
   console.log(chalk.green(`    "rules": {`));
   console.log(chalk.green(`      "react/jsx-key": "error",`));
   console.log(chalk.green(`      "react/no-array-index-key": "warn",`));
@@ -468,7 +468,7 @@ function injectTsconfig(content: string): string | null {
     // Strip JSON comments (// and /* */) for parsing
     const stripped = stripJsonComments(content);
     const config = JSON.parse(stripped);
-    const guardPreset = '@frontend-guard/tsconfig/tsconfig.guard-base.json';
+    const guardPreset = 'fe-guard-tsconfig/tsconfig.guard-base.json';
 
     if (!config.extends) {
       // No extends - add it
@@ -478,7 +478,7 @@ function injectTsconfig(content: string): string | null {
       config.extends = [config.extends, guardPreset];
     } else if (Array.isArray(config.extends)) {
       // Array extends - append
-      if (config.extends.some((e: string) => e.includes('@frontend-guard'))) {
+      if (config.extends.some((e: string) => e.includes('fe-guard'))) {
         return null; // Already has guard preset
       }
       config.extends.push(guardPreset);
@@ -506,7 +506,7 @@ function stripJsonComments(content: string): string {
 
 function generateTsConfig(preset: string, routerType: string | null): string {
   const lines: string[] = [];
-  lines.push(`import type { FrontendGuardConfig } from '@frontend-guard/cli';`);
+  lines.push(`import type { FrontendGuardConfig } from 'fe-guard-cli';`);
   lines.push('');
   lines.push(`export default {`);
   lines.push(`  preset: '${preset}',`);
@@ -532,7 +532,7 @@ function generateTsConfig(preset: string, routerType: string | null): string {
 
 function generateJsConfig(preset: string, routerType: string | null): string {
   const lines: string[] = [];
-  lines.push(`/** @type {import('@frontend-guard/cli').FrontendGuardConfig} */`);
+  lines.push(`/** @type {import('fe-guard-cli').FrontendGuardConfig} */`);
   lines.push(`module.exports = {`);
   lines.push(`  preset: '${preset}',`);
 

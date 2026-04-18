@@ -63,7 +63,7 @@ export const reportCommand = new Command('report')
     if (!eslintBin) {
       console.error('');
       console.error(chalk.red('错误: 未找到 ESLint。请确保已安装 ESLint:'));
-      console.error(chalk.dim('  npm install -D eslint @frontend-guard/eslint-plugin'));
+      console.error(chalk.dim('  npm install -D eslint eslint-plugin-fe-guard'));
       console.error('');
       process.exit(1);
     }

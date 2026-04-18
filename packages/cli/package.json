@@ -1,5 +1,5 @@
 {
-  "name": "@frontend-guard/cli",
+  "name": "fe-guard-cli",
   "version": "0.1.0",
   "description": "CLI tool for Frontend Guard - init, check, report",
   "bin": {

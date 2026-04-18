@@ -1,5 +1,5 @@
 {
-  "name": "@frontend-guard/tsconfig",
+  "name": "fe-guard-tsconfig",
   "version": "0.1.0",
   "description": "TypeScript 严格配置预设 for Frontend Guard",
   "files": [

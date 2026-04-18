@@ -44,10 +44,10 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
-    "@frontend-guard/eslint-plugin": "workspace:*",
-    "@frontend-guard/vite-plugin": "workspace:*",
-    "@frontend-guard/runtime": "workspace:*",
-    "@frontend-guard/tsconfig": "workspace:*",
+    "eslint-plugin-fe-guard": "^0.1.0",
+    "fe-guard-vite-plugin": "^0.1.0",
+    "fe-guard-runtime": "^0.1.0",
+    "fe-guard-tsconfig": "^0.1.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",

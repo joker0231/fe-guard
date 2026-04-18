@@ -5,7 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import react from 'eslint-plugin-react';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import importPlugin from 'eslint-plugin-import';
-import guard from '@frontend-guard/eslint-plugin';
+import guard from 'eslint-plugin-fe-guard';
 
 export default [
   {
@@ -29,7 +29,7 @@ export default [
       react,
       'jsx-a11y': jsxA11y,
       import: importPlugin,
-      '@frontend-guard': guard,
+      'fe-guard': guard,
     },
     rules: {
       ...tseslint.configs['recommended'].rules,

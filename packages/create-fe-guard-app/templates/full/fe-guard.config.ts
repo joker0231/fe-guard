@@ -1,4 +1,4 @@
-import type { FrontendGuardConfig } from '@frontend-guard/cli';
+import type { FrontendGuardConfig } from 'fe-guard-cli';
 
 const config: FrontendGuardConfig = {
   preset: 'extended',

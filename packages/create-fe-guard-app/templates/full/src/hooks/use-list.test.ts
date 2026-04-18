@@ -117,8 +117,10 @@ describe('useList', () => {
       await result.current.refetch();
     });
 
+    await waitFor(() => {
+      expect(result.current.data).toEqual([{ id: 2 }]);
+    });
     expect(queryFn).toHaveBeenCalledTimes(2);
-    expect(result.current.data).toEqual([{ id: 2 }]);
   });
 
   it('enabled=false → 不执行 queryFn', () => {

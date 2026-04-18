@@ -1,5 +1,5 @@
 /**
- * @frontend-guard/eslint-plugin
+ * eslint-plugin-fe-guard
  *
  * ESLint plugin for Frontend Guard - AI代码编译级防御器
  * 71 ESLint rules (Core 60 error + Extended 11 warning) + 14 Vite analyzer rules = 85 total
@@ -211,7 +211,7 @@ import { all } from './configs/all';
 
 const plugin = {
   meta: {
-    name: '@frontend-guard/eslint-plugin',
+    name: 'eslint-plugin-fe-guard',
     version: '0.1.0',
   },
   rules,

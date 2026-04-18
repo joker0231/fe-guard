@@ -1,5 +1,5 @@
 {
-  "name": "@frontend-guard/runtime",
+  "name": "fe-guard-runtime",
   "version": "0.1.0",
   "description": "Runtime defense for Frontend Guard - ErrorBoundary, global error handling, fetch wrapper",
   "main": "dist/index.js",
