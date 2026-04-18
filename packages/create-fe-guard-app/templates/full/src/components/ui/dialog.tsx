@@ -126,21 +126,12 @@ const DialogDescription = React.forwardRef<
 ));
 DialogDescription.displayName = 'Dialog.Description';
 
-type DialogComponent = typeof DialogRoot & {
-  Trigger: typeof DialogTrigger;
-  Close: typeof DialogClose;
-  Content: typeof DialogContent;
-  Header: typeof DialogHeader;
-  Footer: typeof DialogFooter;
-  Title: typeof DialogTitle;
-  Description: typeof DialogDescription;
-};
-
-export const Dialog = DialogRoot as DialogComponent;
-Dialog.Trigger = DialogTrigger;
-Dialog.Close = DialogClose;
-Dialog.Content = DialogContent;
-Dialog.Header = DialogHeader;
-Dialog.Footer = DialogFooter;
-Dialog.Title = DialogTitle;
-Dialog.Description = DialogDescription;
+export const Dialog = Object.assign(DialogRoot, {
+  Trigger: DialogTrigger,
+  Close: DialogClose,
+  Content: DialogContent,
+  Header: DialogHeader,
+  Footer: DialogFooter,
+  Title: DialogTitle,
+  Description: DialogDescription,
+});

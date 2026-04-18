@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DropdownMenu } from './dropdown-menu';
 
-function Basic({ onEdit, onDelete }: { onEdit?: () => void; onDelete?: () => void }) {
+function Basic({ onEdit = () => {}, onDelete = () => {} }: { onEdit?: () => void; onDelete?: () => void }) {
   return (
     <DropdownMenu>
       <DropdownMenu.Trigger>Menu</DropdownMenu.Trigger>

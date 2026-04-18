@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import { Avatar } from './avatar';
 
 describe('Avatar', () => {
-  it('renders fallback when no src', () => {
+  it('renders fallback when no src', async () => {
     render(<Avatar fallback="A" />);
-    expect(screen.getByText('A')).toBeInTheDocument();
+    expect(await screen.findByText('A')).toBeInTheDocument();
   });
 
   it('applies md size classes by default', () => {

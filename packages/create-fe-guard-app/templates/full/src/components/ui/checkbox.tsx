@@ -20,9 +20,9 @@ export const Checkbox = React.forwardRef<
   return (
     <CheckboxPrimitive.Root
       ref={ref}
-      id={id}
-      name={name}
-      checked={checked}
+      {...(id !== undefined && { id })}
+      {...(name !== undefined && { name })}
+      {...(checked !== undefined && { checked })}
       disabled={disabled}
       onCheckedChange={(value) => {
         if (typeof value === 'boolean') {

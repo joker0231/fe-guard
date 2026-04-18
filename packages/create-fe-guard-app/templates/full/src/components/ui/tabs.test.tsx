@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tabs } from './tabs';
 
-function Basic({ onChange }: { onChange?: (v: string) => void }) {
+function Basic({ onChange = () => {} }: { onChange?: (v: string) => void }) {
   return (
     <Tabs defaultValue="a" onValueChange={onChange}>
       <Tabs.List>

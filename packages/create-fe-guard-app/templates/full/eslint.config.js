@@ -6,6 +6,7 @@ import react from 'eslint-plugin-react';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import importPlugin from 'eslint-plugin-import';
 import guard from 'eslint-plugin-fe-guard';
+import globals from 'globals';
 
 export default [
   {
@@ -21,6 +22,11 @@ export default [
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
         project: './tsconfig.json',
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2022,
       },
     },
     plugins: {
@@ -48,6 +54,20 @@ export default [
     },
     settings: {
       react: { version: 'detect' },
+    },
+  },
+  {
+    files: ['**/*.test.{ts,tsx}', '**/test-setup.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2022,
+      },
+    },
+    rules: {
+      'fe-guard/no-native-feedback': 'off',
+      'no-console': 'off',
     },
   },
 ];

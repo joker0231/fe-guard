@@ -86,17 +86,10 @@ const DropdownMenuLabel = React.forwardRef<
 ));
 DropdownMenuLabel.displayName = 'DropdownMenu.Label';
 
-type DropdownMenuComponent = typeof DropdownMenuRoot & {
-  Trigger: typeof DropdownMenuTrigger;
-  Content: typeof DropdownMenuContent;
-  Item: typeof DropdownMenuItem;
-  Separator: typeof DropdownMenuSeparator;
-  Label: typeof DropdownMenuLabel;
-};
-
-export const DropdownMenu = DropdownMenuRoot as DropdownMenuComponent;
-DropdownMenu.Trigger = DropdownMenuTrigger;
-DropdownMenu.Content = DropdownMenuContent;
-DropdownMenu.Item = DropdownMenuItem;
-DropdownMenu.Separator = DropdownMenuSeparator;
-DropdownMenu.Label = DropdownMenuLabel;
+export const DropdownMenu = Object.assign(DropdownMenuRoot, {
+  Trigger: DropdownMenuTrigger,
+  Content: DropdownMenuContent,
+  Item: DropdownMenuItem,
+  Separator: DropdownMenuSeparator,
+  Label: DropdownMenuLabel,
+});

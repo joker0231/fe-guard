@@ -1,9 +1,17 @@
 {
   "name": "eslint-plugin-fe-guard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "ESLint plugin for Frontend Guard - AI代码编译级防御",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "files": ["dist"],
   "scripts": {
     "build": "tsup",

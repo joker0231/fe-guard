@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Dialog } from './dialog';
 
-function Basic({ onOpenChange }: { onOpenChange?: (o: boolean) => void }) {
+function Basic({ onOpenChange = () => {} }: { onOpenChange?: (o: boolean) => void }) {
   return (
     <Dialog onOpenChange={onOpenChange}>
       <Dialog.Trigger>Open</Dialog.Trigger>

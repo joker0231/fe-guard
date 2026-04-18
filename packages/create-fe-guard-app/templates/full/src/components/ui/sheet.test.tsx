@@ -5,7 +5,7 @@ import { Sheet } from './sheet';
 
 function Basic({
   side,
-  onOpenChange,
+  onOpenChange = () => {},
 }: {
   side?: 'bottom' | 'right';
   onOpenChange?: (o: boolean) => void;

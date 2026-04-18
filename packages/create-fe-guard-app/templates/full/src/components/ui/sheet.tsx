@@ -123,21 +123,12 @@ const SheetDescription = React.forwardRef<
 ));
 SheetDescription.displayName = 'Sheet.Description';
 
-type SheetComponent = typeof SheetRoot & {
-  Trigger: typeof SheetTrigger;
-  Close: typeof SheetClose;
-  Content: typeof SheetContent;
-  Header: typeof SheetHeader;
-  Footer: typeof SheetFooter;
-  Title: typeof SheetTitle;
-  Description: typeof SheetDescription;
-};
-
-export const Sheet = SheetRoot as SheetComponent;
-Sheet.Trigger = SheetTrigger;
-Sheet.Close = SheetClose;
-Sheet.Content = SheetContent;
-Sheet.Header = SheetHeader;
-Sheet.Footer = SheetFooter;
-Sheet.Title = SheetTitle;
-Sheet.Description = SheetDescription;
+export const Sheet = Object.assign(SheetRoot, {
+  Trigger: SheetTrigger,
+  Close: SheetClose,
+  Content: SheetContent,
+  Header: SheetHeader,
+  Footer: SheetFooter,
+  Title: SheetTitle,
+  Description: SheetDescription,
+});

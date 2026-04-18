@@ -1,9 +1,6 @@
-import { useState } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 
 function App() {
-  const [_count, _setCount] = useState(0);
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border">

@@ -71,13 +71,8 @@ const TabsContent = React.forwardRef<
 ));
 TabsContent.displayName = 'Tabs.Content';
 
-type TabsComponent = typeof TabsRoot & {
-  List: typeof TabsList;
-  Trigger: typeof TabsTrigger;
-  Content: typeof TabsContent;
-};
-
-export const Tabs = TabsRoot as TabsComponent;
-Tabs.List = TabsList;
-Tabs.Trigger = TabsTrigger;
-Tabs.Content = TabsContent;
+export const Tabs = Object.assign(TabsRoot, {
+  List: TabsList,
+  Trigger: TabsTrigger,
+  Content: TabsContent,
+});

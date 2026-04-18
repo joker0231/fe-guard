@@ -1,6 +1,6 @@
 {
   "name": "fe-guard-vite-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vite plugin for Frontend Guard - L2 cross-file analysis",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

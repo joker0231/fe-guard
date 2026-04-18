@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ErrorBoundary } from '@frontend-guard/runtime';
+import { GuardErrorBoundary } from 'fe-guard-runtime';
 import App from './App';
 import './index.css';
 
@@ -21,10 +21,10 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <ErrorBoundary>
+    <GuardErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>
-    </ErrorBoundary>
+    </GuardErrorBoundary>
   </React.StrictMode>,
 );

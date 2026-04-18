@@ -72,17 +72,10 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 );
 CardFooter.displayName = 'Card.Footer';
 
-type CardComponent = typeof CardRoot & {
-  Header: typeof CardHeader;
-  Title: typeof CardTitle;
-  Description: typeof CardDescription;
-  Content: typeof CardContent;
-  Footer: typeof CardFooter;
-};
-
-export const Card = CardRoot as CardComponent;
-Card.Header = CardHeader;
-Card.Title = CardTitle;
-Card.Description = CardDescription;
-Card.Content = CardContent;
-Card.Footer = CardFooter;
+export const Card = Object.assign(CardRoot, {
+  Header: CardHeader,
+  Title: CardTitle,
+  Description: CardDescription,
+  Content: CardContent,
+  Footer: CardFooter,
+});

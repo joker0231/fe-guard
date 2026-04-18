@@ -1,6 +1,6 @@
 {
   "name": "create-fe-guard-app",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "Scaffolding tool for fe-guard-powered React projects",
   "type": "module",
   "bin": {

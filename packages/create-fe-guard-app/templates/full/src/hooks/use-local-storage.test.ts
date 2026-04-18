@@ -92,7 +92,7 @@ describe('useLocalStorage', () => {
 
     const raw = window.localStorage.getItem('pref');
     expect(raw).not.toBeNull();
-    expect(JSON.parse(raw as string)).toEqual(next);
+    expect(raw === null ? null : JSON.parse(raw)).toEqual(next);
   });
 
   it('localStorage.setItem 抛错 → state 仍更新，不崩溃', () => {

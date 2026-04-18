@@ -19,6 +19,10 @@ interface LogPayload {
   timestamp: string;
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 function formatError(error: unknown): Record<string, unknown> {
   if (error instanceof Error) {
     return {
@@ -40,8 +44,8 @@ function buildPayload(level: LogLevel, message: string, extra?: unknown): LogPay
     if (extra instanceof Error) {
       payload.error = extra;
       payload.extra = formatError(extra);
-    } else if (typeof extra === 'object' && extra !== null) {
-      payload.extra = extra as Record<string, unknown>;
+    } else if (isPlainObject(extra)) {
+      payload.extra = { ...extra };
     } else {
       payload.extra = { value: extra };
     }
@@ -49,15 +53,17 @@ function buildPayload(level: LogLevel, message: string, extra?: unknown): LogPay
   return payload;
 }
 
-function reportToRemote(_payload: LogPayload): void {
+function reportToRemote(payload: LogPayload): void {
   // TODO: 接入真实的监控平台（Sentry / 自建上报等）
+  void payload;
   // if (import.meta.env.PROD) {
-  //   fetch('/api/log', { method: 'POST', body: JSON.stringify(_payload) }).catch(() => {});
+  //   fetch('/api/log', { method: 'POST', body: JSON.stringify(payload) }).catch(() => {});
   // }
 }
 
 function emit(payload: LogPayload): void {
   if (import.meta.env.DEV) {
+    /* eslint-disable no-console */
     const fn =
       payload.level === 'error'
         ? console.error
@@ -65,6 +71,7 @@ function emit(payload: LogPayload): void {
         ? console.warn
         : console.log;
     fn(`[${payload.level.toUpperCase()}] ${payload.message}`, payload.extra ?? '');
+    /* eslint-enable no-console */
   } else {
     reportToRemote(payload);
   }

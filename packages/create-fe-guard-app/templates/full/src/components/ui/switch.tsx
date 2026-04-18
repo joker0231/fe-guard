@@ -19,11 +19,11 @@ export const Switch = React.forwardRef<
   return (
     <SwitchPrimitive.Root
       ref={ref}
-      id={id}
-      name={name}
-      checked={checked}
+      {...(id !== undefined && { id })}
+      {...(name !== undefined && { name })}
+      {...(checked !== undefined && { checked })}
+      {...(onChange !== undefined && { onCheckedChange: onChange })}
       disabled={disabled}
-      onCheckedChange={onChange}
       aria-label={rest['aria-label']}
       className={cn(
         'peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors',
