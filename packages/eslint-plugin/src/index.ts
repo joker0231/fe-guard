@@ -61,6 +61,7 @@ import noRawDangerouslySetInnerhtml from './rules/security/no-raw-dangerously-se
 import noNativeFeedback from './rules/security/no-native-feedback';
 import noHardcodedSecret from './rules/security/no-hardcoded-secret';
 import requireErrorHandlerOnEvents from './rules/error-handling/require-error-handler-on-events';
+import noEmptyCatch from './rules/error-handling/no-empty-catch';
 import requireIoValidation from './rules/data-flow/require-io-validation';
 
 // ── Board 11: AI Smell ──
@@ -161,6 +162,7 @@ const rules = {
   'no-native-feedback': noNativeFeedback,
   'no-hardcoded-secret': noHardcodedSecret,
   'require-error-handler-on-events': requireErrorHandlerOnEvents,
+  'no-empty-catch': noEmptyCatch,
   'require-io-validation': requireIoValidation,
   // Board 11
   'no-placeholder-url': noPlaceholderUrl,
