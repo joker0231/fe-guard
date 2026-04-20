@@ -17,6 +17,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/require-auth-guard': 'error',
     'fe-guard/no-location-href-navigate': 'error',
     'fe-guard/enforce-route-export-convention': 'error',
+    'fe-guard/enforce-flat-routes': 'error',
     // 板块3 错误兜底
     'fe-guard/require-error-boundary': 'error',
     'fe-guard/require-loading-state': 'error',

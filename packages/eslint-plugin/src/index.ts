@@ -2,7 +2,7 @@
  * eslint-plugin-fe-guard
  *
  * ESLint plugin for Frontend Guard - AI代码编译级防御器
- * 76 ESLint rules (Core 65 error + Extended 11 error) + 14 Vite analyzer rules = 90 total
+ * 77 ESLint rules (Core 66 error + Extended 11 error) + 14 Vite analyzer rules = 90 total
  */
 
 // ── Board 1: Event Handler ──
@@ -14,6 +14,7 @@ import noDeadLink from './rules/page-reachability/no-dead-link';
 import requireAuthGuard from './rules/page-reachability/require-auth-guard';
 import noLocationHrefNavigate from './rules/page-reachability/no-location-href-navigate';
 import enforceRouteExportConvention from './rules/page-reachability/enforce-route-export-convention';
+import enforceFlatRoutes from './rules/page-reachability/enforce-flat-routes';
 
 // ── Board 3: Error Boundary ──
 import requireErrorBoundary from './rules/error-boundary/require-error-boundary';
@@ -128,6 +129,7 @@ const rules = {
   'require-auth-guard': requireAuthGuard,
   'no-location-href-navigate': noLocationHrefNavigate,
   'enforce-route-export-convention': enforceRouteExportConvention,
+  'enforce-flat-routes': enforceFlatRoutes,
   // Board 3
   'require-error-boundary': requireErrorBoundary,
   'require-loading-state': requireLoadingState,
