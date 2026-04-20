@@ -1,17 +1,20 @@
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/utils';
 import { createRule } from '../../utils/rule-helpers';
 
-type MessageIds = 'missingFormValidation' | 'missingSubmitValidation';
+type MessageIds = 'missingFormValidation';
 
 // Validation function/method names that count as "doing validation"
 const VALIDATION_CALLS = new Set([
   'validateForm',
   'validate',
   'safeParse',
-  'parse',
   'trigger',        // React Hook Form trigger()
   'handleSubmit',   // React Hook Form handleSubmit()
 ]);
+
+// For `.parse()` method calls, only count as validation if the object name
+// suggests a schema/validator (to avoid false positives like JSON.parse, Date.parse)
+const SCHEMA_OBJECT_PATTERNS = /schema|zod|yup|joi|validator|formSchema|loginSchema|registerSchema/i;
 
 // Check if a node is a call to handleSubmit (React Hook Form pattern)
 function isHandleSubmitCall(node: TSESTree.Node): boolean {
@@ -43,11 +46,22 @@ function isValidationCall(node: TSESTree.CallExpression): boolean {
   ) {
     return true;
   }
-  // Method call: schema.safeParse(...), schema.parse(...), form.trigger(...)
+  // Method call: schema.safeParse(...), form.trigger(...)
   if (
     node.callee.type === AST_NODE_TYPES.MemberExpression &&
     node.callee.property.type === AST_NODE_TYPES.Identifier &&
     VALIDATION_CALLS.has(node.callee.property.name)
+  ) {
+    return true;
+  }
+  // Special handling for .parse() — only count as validation if object looks like a schema
+  // This avoids false positives from JSON.parse(), Date.parse(), URL.parse() etc.
+  if (
+    node.callee.type === AST_NODE_TYPES.MemberExpression &&
+    node.callee.property.type === AST_NODE_TYPES.Identifier &&
+    node.callee.property.name === 'parse' &&
+    node.callee.object.type === AST_NODE_TYPES.Identifier &&
+    SCHEMA_OBJECT_PATTERNS.test(node.callee.object.name)
   ) {
     return true;
   }
@@ -161,8 +175,6 @@ export const requireFormValidation = createRule<[], MessageIds>({
     messages: {
       missingFormValidation:
         'Form onSubmit handler must include validation (e.g., validateForm(), schema.safeParse(), or use handleSubmit from React Hook Form) before submitting data.',
-      missingSubmitValidation:
-        'Submit button onClick handler must include validation before triggering API calls.',
     },
     schema: [],
   },

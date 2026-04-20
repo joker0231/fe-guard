@@ -181,6 +181,21 @@ ruleTester.run('require-form-validation', requireFormValidation, {
         }
       `,
     },
+  
+    // formSchema.parse() should still count as validation (schema name matches pattern)
+    {
+      code: `
+        function RegisterForm() {
+          return <form onSubmit={(e) => {
+            e.preventDefault();
+            const data = formSchema.parse(formData);
+            api.register(data);
+          }}>
+            <button type="submit">Submit</button>
+          </form>;
+        }
+      `,
+    },
   ],
   invalid: [
     // Inline arrow with NO validation - direct API call
@@ -272,5 +287,21 @@ ruleTester.run('require-form-validation', requireFormValidation, {
       `,
       errors: [{ messageId: 'missingFormValidation' }],
     },
+    // JSON.parse should NOT count as validation (P1-1 fix)
+    {
+      code: `
+        function RegisterForm() {
+          return <form onSubmit={(e) => {
+            e.preventDefault();
+            const data = JSON.parse(formStr);
+            api.register(data);
+          }}>
+            <button type="submit">Submit</button>
+          </form>;
+        }
+      `,
+      errors: [{ messageId: 'missingFormValidation' }],
+    },
+  
   ],
 });

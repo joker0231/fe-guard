@@ -240,6 +240,10 @@ export function createWSClient<TSend = unknown, TReceive = unknown>(
   }
 
   function connect() {
+    // 清理旧定时器（防止旧心跳/重连定时器泄漏影响新连接）
+    stopHeartbeat();
+    cancelReconnect();
+
     // 清理旧连接
     if (ws) {
       ws.onopen = null;

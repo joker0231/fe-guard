@@ -238,6 +238,12 @@ export function createHttpClient(config: HttpClientConfig) {
       schema: z.ZodSchema<T>,
     ): Promise<T> {
       const response = await baseRequest(config, path, options);
+
+      // Handle 204 No Content (common for DELETE requests)
+      if (response.status === 204) {
+        return schema.parse(undefined);
+      }
+
       const raw = await response.json();
 
       // ── 响应校验点（结构约束）──
