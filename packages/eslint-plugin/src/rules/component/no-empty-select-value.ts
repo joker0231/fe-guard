@@ -5,42 +5,60 @@ const createRule = ESLintUtils.RuleCreator(
 );
 
 /**
- * 检测 Select.Item / SelectItem 的 value prop 为空字符串或缺失
+ * 检测选择类组件的 value prop 为空字符串、缺失或 fallback 到空字符串
  *
- * Radix UI 的 Select.Item 要求 value 不能为空字符串。
- * AI 常犯错误：用空 value 的 Item 做"请选择..."占位，
- * 正确方式是使用 Select 的 placeholder 属性。
+ * 覆盖范围：
+ * - 成员表达式：*.Item / *.Option（对象名包含 Select/Listbox/Combobox/Radio/Tab/Toggle/Primitive）
+ * - 标识符：SelectItem/RadioItem/TabsTrigger 等（名字匹配选择类组件模式）
+ *
+ * 检测模式：
+ * 1. value="" / value={""} / value={``} — 字面量空字符串
+ * 2. 缺少 value prop
+ * 3. value={x ?? ''} / value={x || ''} — fallback 到空字符串的不安全模式
  */
 
-// 匹配的组件名（成员表达式和标识符两种形式）
-const MEMBER_PATTERNS: Array<{ object: string; property: string }> = [
-  { object: 'Select', property: 'Item' },
-  { object: 'Select', property: 'Option' },
-  { object: 'Listbox', property: 'Option' },
-  { object: 'Combobox', property: 'Option' },
+// 对象名关键词（包含任一即匹配）
+const OBJECT_KEYWORDS = [
+  'Select', 'Listbox', 'Combobox', 'Radio', 'Tab', 'Toggle', 'Primitive',
 ];
 
-const IDENTIFIER_PATTERNS = new Set([
+// 属性名白名单（只有这些属性名会被检测）
+// Trigger 只在 Tab 相关组件中需要 value，在 Select/Radio 中 Trigger 是打开按钮不需要 value
+const ITEM_PROPERTY_NAMES = new Set(['Item', 'Option']);
+const TRIGGER_PROPERTY_NAME = 'Trigger';
+
+// 标识符匹配正则：选择类组件 + Item/Option/Trigger 后缀
+const IDENTIFIER_PATTERN = /^(?:.*(?:Select|Listbox|Combobox|Radio|Tab|Toggle).*(?:Item|Option|Trigger))$/;
+
+// 额外的精确标识符匹配（常见命名）
+const EXTRA_IDENTIFIERS = new Set([
   'SelectItem',
   'SelectOption',
   'ListboxOption',
   'ComboboxOption',
+  'RadioItem',
+  'RadioGroupItem',
+  'TabsTrigger',
+  'TabTrigger',
+  'ToggleGroupItem',
 ]);
 
-type MessageIds = 'emptyValue' | 'missingValue';
+type MessageIds = 'emptyValue' | 'missingValue' | 'emptyFallback';
 
 export default createRule<[], MessageIds>({
   name: 'no-empty-select-value',
   meta: {
     type: 'problem',
     docs: {
-      description: 'Disallow empty string value on Select items',
+      description: 'Disallow empty string value on selection component items',
     },
     messages: {
       emptyValue:
-        'Select item 的 value 不能为空字符串。使用 Select 的 placeholder 属性代替空 value 的占位项。',
+        'Select/Radio/Tab 等选择组件的 value 不能为空字符串。使用 placeholder 属性或提供有意义的值。',
       missingValue:
-        'Select item 必须有 value prop。',
+        '选择组件的 item 必须有 value prop。',
+      emptyFallback:
+        'value 中使用了 ?? "" �� || "" fallback 到空字符串，这会导致运行时错误。请在数据源过滤无效选项或提供有意义的默认值。',
     },
     schema: [],
   },
@@ -49,25 +67,43 @@ export default createRule<[], MessageIds>({
     function isTargetElement(node: TSESTree.JSXOpeningElement): boolean {
       const { name } = node;
 
-      // 成员表达式：Select.Item
+      // 成员表达式：*.Item / *.Option（任何选择类对象）
       if (
         name.type === 'JSXMemberExpression' &&
-        name.object.type === 'JSXIdentifier' &&
         name.property.type === 'JSXIdentifier'
       ) {
-        return MEMBER_PATTERNS.some(
-          (p) =>
-            (name.object as TSESTree.JSXIdentifier).name === p.object &&
-            name.property.name === p.property
-        );
+        const propName = name.property.name;
+        const objectName = getObjectName(name.object);
+
+        if (objectName && OBJECT_KEYWORDS.some((kw) => objectName.includes(kw))) {
+          // Item/Option: 任何选择类组件都需要 value
+          if (ITEM_PROPERTY_NAMES.has(propName)) return true;
+          // Trigger: 只在 Tab 相关组件中需要 value
+          if (propName === TRIGGER_PROPERTY_NAME && objectName.includes('Tab')) return true;
+        }
       }
 
-      // 标识符：SelectItem
+      // 标识符：SelectItem 等
       if (name.type === 'JSXIdentifier') {
-        return IDENTIFIER_PATTERNS.has(name.name);
+        if (EXTRA_IDENTIFIERS.has(name.name)) return true;
+        if (IDENTIFIER_PATTERN.test(name.name)) return true;
       }
 
       return false;
+    }
+
+    function getObjectName(node: TSESTree.JSXTagNameExpression): string | null {
+      if (node.type === 'JSXIdentifier') {
+        return node.name;
+      }
+      // 嵌套成员表达式：a.b.Item → 取 "a.b"
+      if (node.type === 'JSXMemberExpression') {
+        const obj = getObjectName(node.object);
+        if (obj && node.property.type === 'JSXIdentifier') {
+          return `${obj}.${node.property.name}`;
+        }
+      }
+      return null;
     }
 
     function getValueProp(
@@ -118,6 +154,46 @@ export default createRule<[], MessageIds>({
       return false;
     }
 
+    function isEmptyFallbackPattern(
+      value: TSESTree.JSXAttribute['value']
+    ): boolean {
+      if (!value || value.type !== 'JSXExpressionContainer') return false;
+
+      const expr = value.expression;
+
+      // value={x ?? ''} or value={x || ''}
+      if (
+        expr.type === 'LogicalExpression' &&
+        (expr.operator === '??' || expr.operator === '||')
+      ) {
+        return isEmptyLiteralNode(expr.right);
+      }
+
+      // value={x ? '' : y} or value={x ? y : ''}
+      if (expr.type === 'ConditionalExpression') {
+        return isEmptyLiteralNode(expr.consequent) || isEmptyLiteralNode(expr.alternate);
+      }
+
+      return false;
+    }
+
+    function isEmptyLiteralNode(node: TSESTree.Expression | TSESTree.PrivateIdentifier): boolean {
+      // ''
+      if (node.type === 'Literal' && node.value === '') return true;
+
+      // `` (空模板字面量)
+      if (
+        node.type === 'TemplateLiteral' &&
+        node.quasis.length === 1 &&
+        node.expressions.length === 0 &&
+        node.quasis[0].value.raw === ''
+      ) {
+        return true;
+      }
+
+      return false;
+    }
+
     return {
       JSXOpeningElement(node) {
         if (!isTargetElement(node)) return;
@@ -137,6 +213,14 @@ export default createRule<[], MessageIds>({
           context.report({
             node: valueProp,
             messageId: 'emptyValue',
+          });
+          return;
+        }
+
+        if (isEmptyFallbackPattern(valueProp.value)) {
+          context.report({
+            node: valueProp,
+            messageId: 'emptyFallback',
           });
         }
       },
