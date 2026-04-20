@@ -19,6 +19,7 @@ export default createRule({
   defaultOptions: [],
   create(context) {
     return {
+      // Case 1: Direct enum field in JSX - e.g. {task.status}
       'JSXExpressionContainer > MemberExpression'(node: TSESTree.MemberExpression) {
         if (node.computed) return;
         if (node.property.type !== 'Identifier') return;
@@ -26,6 +27,22 @@ export default createRule({
 
         const expression = context.sourceCode.getText(node);
         context.report({ node, messageId: 'enumRawRender', data: { expression } });
+      },
+
+      // Case 2: Enum field inside template literal in JSX
+      // e.g. {`Status: ${task.status}`}
+      'JSXExpressionContainer > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
+        for (const expr of node.expressions) {
+          if (
+            expr.type === 'MemberExpression' &&
+            !expr.computed &&
+            expr.property.type === 'Identifier' &&
+            ENUM_KEYWORDS.has(expr.property.name.toLowerCase())
+          ) {
+            const expression = context.sourceCode.getText(expr);
+            context.report({ node: expr, messageId: 'enumRawRender', data: { expression } });
+          }
+        }
       },
     };
   },

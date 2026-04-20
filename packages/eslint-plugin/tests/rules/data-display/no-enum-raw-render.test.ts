@@ -19,6 +19,10 @@ ruleTester.run('no-enum-raw-render', rule, {
     { code: `<span>{item.name}</span>` },
     // Conditional rendering
     { code: `<span>{order.status === 1 ? '已完成' : '进行中'}</span>` },
+    // Template literal without enum field
+    { code: '<span>{`Hello ${user.name}`}</span>' },
+    // Template literal with mapped enum
+    { code: '<span>{`Status: ${statusMap[task.status]}`}</span>' },
   ],
   invalid: [
     {
@@ -31,6 +35,21 @@ ruleTester.run('no-enum-raw-render', rule, {
     },
     {
       code: `<div>{item.type}</div>`,
+      errors: [{ messageId: 'enumRawRender' }],
+    },
+    // Template literal with raw enum field
+    {
+      code: '<span>{`Status: ${task.status}`}</span>',
+      errors: [{ messageId: 'enumRawRender' }],
+    },
+    // Template literal with multiple enum fields
+    {
+      code: '<span>{`${item.type} - ${item.priority}`}</span>',
+      errors: [{ messageId: 'enumRawRender' }, { messageId: 'enumRawRender' }],
+    },
+    // Template literal with enum in div
+    {
+      code: '<div>{`Role: ${user.role}`}</div>',
       errors: [{ messageId: 'enumRawRender' }],
     },
   ],

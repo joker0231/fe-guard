@@ -32,6 +32,7 @@ import safeJsonParse from './rules/api-safety/safe-json-parse';
 import noRawFetch from './rules/api-safety/no-raw-fetch';
 import noImmediateMutationOnInput from './rules/api-safety/no-immediate-mutation-on-input';
 import requireFormValidation from './rules/api-safety/require-form-validation';
+import noZeroDebounce from './rules/api-safety/no-zero-debounce';
 
 // ── Board 5: Component ──
 import conditionalRenderComplete from './rules/component/conditional-render-complete';
@@ -72,6 +73,7 @@ import noEmptyCatch from './rules/error-handling/no-empty-catch';
 import requireIoValidation from './rules/data-flow/require-io-validation';
 import noDuplicateTypeDefinition from './rules/data-flow/no-duplicate-type-definition';
 import requireSharedSchema from './rules/data-flow/require-shared-schema';
+import requireStorageKeyConstants from './rules/data-flow/require-storage-key-constants';
 
 // ── Board 11: AI Smell ──
 import noPlaceholderUrl from './rules/ai-smell/no-placeholder-url';
@@ -148,6 +150,7 @@ const rules = {
   'no-raw-fetch': noRawFetch,
   'no-immediate-mutation-on-input': noImmediateMutationOnInput,
   'require-form-validation': requireFormValidation,
+  'no-zero-debounce': noZeroDebounce,
   // Board 5
   'conditional-render-complete': conditionalRenderComplete,
   'no-state-in-render': noStateInRender,
@@ -182,6 +185,7 @@ const rules = {
   'require-io-validation': requireIoValidation,
   'no-duplicate-type-definition': noDuplicateTypeDefinition,
   'require-shared-schema': requireSharedSchema,
+  'require-storage-key-constants': requireStorageKeyConstants,
   // Board 11
   'no-placeholder-url': noPlaceholderUrl,
   'no-todo-in-production': noTodoInProduction,

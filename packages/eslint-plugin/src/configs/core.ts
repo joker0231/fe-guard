@@ -65,6 +65,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/require-io-validation': 'error',
     'fe-guard/no-duplicate-type-definition': 'error',
     'fe-guard/require-shared-schema': 'error',
+    'fe-guard/require-storage-key-constants': 'error',
     // 板块11 AI代码气味
     'fe-guard/no-placeholder-url': 'error',
     'fe-guard/no-todo-in-production': 'error',
@@ -95,6 +96,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/async-handler-try-catch': 'error',
     'fe-guard/controlled-or-uncontrolled': 'error',
     'fe-guard/require-debounce-throttle': 'error',
+    'fe-guard/no-zero-debounce': 'error',
     // 板块17 标准ESLint推荐
     'eqeqeq': 'error',
   },
