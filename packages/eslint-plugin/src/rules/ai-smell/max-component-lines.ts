@@ -3,7 +3,7 @@ import type { TSESTree } from '@typescript-eslint/utils';
 
 type Options = [{ maxLines?: number }];
 
-const DEFAULT_MAX_LINES = 200;
+const DEFAULT_MAX_LINES = 800;
 
 /** Check if a function returns JSX (is a React component) */
 function returnsJSX(node: TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression): boolean {
