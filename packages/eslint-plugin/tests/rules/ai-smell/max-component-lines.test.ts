@@ -62,7 +62,7 @@ ruleTester.run('max-component-lines', rule, {
     {
       code: `
         function HugeComponent() {
-          ${genLines(200)}
+          ${genLines(810)}
           return <div>huge</div>;
         }
       `,
@@ -72,7 +72,7 @@ ruleTester.run('max-component-lines', rule, {
     {
       code: `
         const HugeArrow = () => {
-          ${genLines(200)}
+          ${genLines(810)}
           return <span>big</span>;
         };
       `,
@@ -93,7 +93,7 @@ ruleTester.run('max-component-lines', rule, {
     {
       code: `
         const BigFunc = function BigComponent() {
-          ${genLines(200)}
+          ${genLines(810)}
           return <div>big func</div>;
         };
       `,

@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-fe-guard",
-  "version": "0.1.4",
-  "description": "ESLint plugin for Frontend Guard - AI代码编译级防御",
+  "version": "0.2.0",
+  "description": "ESLint plugin for Frontend Guard - AI\u4ee3\u7801\u7f16\u8bd1\u7ea7\u9632\u5fa1",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -12,7 +12,9 @@
       "require": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -26,5 +28,11 @@
     "@typescript-eslint/utils": "^8.0.0",
     "@typescript-eslint/typescript-estree": "^8.0.0"
   },
-  "keywords": ["eslint", "eslintplugin", "frontend-guard", "ai", "react"]
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "frontend-guard",
+    "ai",
+    "react"
+  ]
 }

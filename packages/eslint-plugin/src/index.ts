@@ -2,7 +2,7 @@
  * eslint-plugin-fe-guard
  *
  * ESLint plugin for Frontend Guard - AI代码编译级防御器
- * 71 ESLint rules (Core 60 error + Extended 11 warning) + 14 Vite analyzer rules = 85 total
+ * 75 ESLint rules (Core 64 error + Extended 11 error) + 14 Vite analyzer rules = 85 total
  */
 
 // ── Board 1: Event Handler ──
@@ -13,6 +13,7 @@ import handlerMustExist from './rules/event-handler/handler-must-exist';
 import noDeadLink from './rules/page-reachability/no-dead-link';
 import requireAuthGuard from './rules/page-reachability/require-auth-guard';
 import noLocationHrefNavigate from './rules/page-reachability/no-location-href-navigate';
+import enforceRouteExportConvention from './rules/page-reachability/enforce-route-export-convention';
 
 // ── Board 3: Error Boundary ──
 import requireErrorBoundary from './rules/error-boundary/require-error-boundary';
@@ -27,6 +28,8 @@ import responseNullCheck from './rules/api-safety/response-null-check';
 import apiTimeout from './rules/api-safety/api-timeout';
 import noGetWithBody from './rules/api-safety/no-get-with-body';
 import safeJsonParse from './rules/api-safety/safe-json-parse';
+import noRawFetch from './rules/api-safety/no-raw-fetch';
+import noImmediateMutationOnInput from './rules/api-safety/no-immediate-mutation-on-input';
 
 // ── Board 5: Component ──
 import conditionalRenderComplete from './rules/component/conditional-render-complete';
@@ -63,6 +66,7 @@ import noHardcodedSecret from './rules/security/no-hardcoded-secret';
 import requireErrorHandlerOnEvents from './rules/error-handling/require-error-handler-on-events';
 import noEmptyCatch from './rules/error-handling/no-empty-catch';
 import requireIoValidation from './rules/data-flow/require-io-validation';
+import noDuplicateTypeDefinition from './rules/data-flow/no-duplicate-type-definition';
 
 // ── Board 11: AI Smell ──
 import noPlaceholderUrl from './rules/ai-smell/no-placeholder-url';
@@ -122,6 +126,7 @@ const rules = {
   'no-dead-link': noDeadLink,
   'require-auth-guard': requireAuthGuard,
   'no-location-href-navigate': noLocationHrefNavigate,
+  'enforce-route-export-convention': enforceRouteExportConvention,
   // Board 3
   'require-error-boundary': requireErrorBoundary,
   'require-loading-state': requireLoadingState,
@@ -134,6 +139,8 @@ const rules = {
   'api-timeout': apiTimeout,
   'no-get-with-body': noGetWithBody,
   'safe-json-parse': safeJsonParse,
+  'no-raw-fetch': noRawFetch,
+  'no-immediate-mutation-on-input': noImmediateMutationOnInput,
   // Board 5
   'conditional-render-complete': conditionalRenderComplete,
   'no-state-in-render': noStateInRender,
@@ -164,6 +171,7 @@ const rules = {
   'require-error-handler-on-events': requireErrorHandlerOnEvents,
   'no-empty-catch': noEmptyCatch,
   'require-io-validation': requireIoValidation,
+  'no-duplicate-type-definition': noDuplicateTypeDefinition,
   // Board 11
   'no-placeholder-url': noPlaceholderUrl,
   'no-todo-in-production': noTodoInProduction,

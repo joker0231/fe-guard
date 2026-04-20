@@ -16,6 +16,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/no-dead-link': 'error',
     'fe-guard/require-auth-guard': 'error',
     'fe-guard/no-location-href-navigate': 'error',
+    'fe-guard/enforce-route-export-convention': 'error',
     // 板块3 错误兜底
     'fe-guard/require-error-boundary': 'error',
     'fe-guard/require-loading-state': 'error',
@@ -28,6 +29,8 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/api-timeout': 'error',
     'fe-guard/no-get-with-body': 'error',
     'fe-guard/safe-json-parse': 'error',
+    'fe-guard/no-raw-fetch': 'error',
+    'fe-guard/no-immediate-mutation-on-input': 'error',
     // 板块5 组件健壮
     'fe-guard/conditional-render-complete': 'error',
     'fe-guard/no-state-in-render': 'error',
@@ -56,6 +59,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/no-hardcoded-secret': 'error',
     'fe-guard/require-error-handler-on-events': 'error',
     'fe-guard/require-io-validation': 'error',
+    'fe-guard/no-duplicate-type-definition': 'error',
     // 板块11 AI代码气味
     'fe-guard/no-placeholder-url': 'error',
     'fe-guard/no-todo-in-production': 'error',
