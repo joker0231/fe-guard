@@ -83,6 +83,28 @@ export default createRule({
             }
           }
         }
+
+        // Check for useMutation destructured error
+        if (
+          node.callee.type === 'Identifier' &&
+          node.callee.name === 'useMutation'
+        ) {
+          current.hasAsyncFetch = true;
+          if (
+            node.parent?.type === 'VariableDeclarator' &&
+            node.parent.id.type === 'ObjectPattern'
+          ) {
+            for (const prop of node.parent.id.properties) {
+              if (
+                prop.type === 'Property' &&
+                prop.key.type === 'Identifier' &&
+                isErrorVariable(prop.key.name)
+              ) {
+                current.hasErrorState = true;
+              }
+            }
+          }
+        }
       },
 
       VariableDeclarator(node: TSESTree.VariableDeclarator) {

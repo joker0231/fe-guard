@@ -68,13 +68,35 @@ export default createRule({
           current.hasAsyncFetch = true;
         }
 
-        // Check for useQuery/useSWR destructured loading
+        // Check for useQuery/useSWR/useInfiniteQuery destructured loading
         if (
           node.callee.type === 'Identifier' &&
           (node.callee.name === 'useQuery' || node.callee.name === 'useSWR' || node.callee.name === 'useInfiniteQuery')
         ) {
           current.hasAsyncFetch = true;
           // Check if destructured with loading variable
+          if (
+            node.parent?.type === 'VariableDeclarator' &&
+            node.parent.id.type === 'ObjectPattern'
+          ) {
+            for (const prop of node.parent.id.properties) {
+              if (
+                prop.type === 'Property' &&
+                prop.key.type === 'Identifier' &&
+                isLoadingVariable(prop.key.name)
+              ) {
+                current.hasLoadingState = true;
+              }
+            }
+          }
+        }
+
+        // Check for useMutation destructured loading (isPending)
+        if (
+          node.callee.type === 'Identifier' &&
+          node.callee.name === 'useMutation'
+        ) {
+          current.hasAsyncFetch = true;
           if (
             node.parent?.type === 'VariableDeclarator' &&
             node.parent.id.type === 'ObjectPattern'
