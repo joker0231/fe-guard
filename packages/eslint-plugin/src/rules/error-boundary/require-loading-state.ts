@@ -2,6 +2,16 @@ import { createRule } from '../../utils/rule-helpers';
 import { isAsyncFetchCall, isLoadingVariable, extractUseStatePair } from '../../utils/react-helpers';
 import type { TSESTree } from '@typescript-eslint/utils';
 
+// Known loading fields from popular hooks
+const HOOK_LOADING_FIELDS = new Set([
+  'isPending', 'isLoading', 'isFetching', 'isRefetching', 'status',
+]);
+
+// Known data-fetching hooks
+const DATA_FETCH_HOOKS = new Set([
+  'useQuery', 'useSWR', 'useInfiniteQuery', 'useMutation',
+]);
+
 export default createRule({
   name: 'require-loading-state',
   meta: {
@@ -11,6 +21,8 @@ export default createRule({
     messages: {
       missingLoadingState:
         "组件有异步数据获取但缺少loading状态处理。数据加载期间用户看到空白。请添加loading状态：1) `const [loading, setLoading] = useState(true)` + 条件渲染；2) 或使用 `useQuery` 的 `isLoading`；3) 或用 `<Suspense fallback={<Loading />}>` 包裹。",
+      missingHookLoadingField:
+        "使用了 {{hookName}} 但未解构其内置 loading 状态字段（如 isPending/isLoading）。请直接从 hook 解构中获取 loading 状态，而非自行用 useState 管理。",
     },
   },
   defaultOptions: [],
@@ -19,6 +31,8 @@ export default createRule({
     const componentStack: Array<{
       hasAsyncFetch: boolean;
       hasLoadingState: boolean;
+      // Track hook-specific loading: hook was destructured but loading field missing
+      hookFetchWithoutLoading: string | null; // hook name, or null
       node: TSESTree.Node;
     }> = [];
 
@@ -34,21 +48,67 @@ export default createRule({
         name = node.parent.id.name;
       }
       if (name && /^[A-Z]/.test(name)) {
-        componentStack.push({ hasAsyncFetch: false, hasLoadingState: false, node });
+        componentStack.push({
+          hasAsyncFetch: false,
+          hasLoadingState: false,
+          hookFetchWithoutLoading: null,
+          node,
+        });
       }
     }
 
     function exitComponent(node: TSESTree.Node) {
       if (componentStack.length === 0) return;
       const top = componentStack[componentStack.length - 1];
-      // Check if this is the same node
-      let matchNode = node;
-      if (top.node === matchNode) {
+      if (top.node === node) {
         componentStack.pop();
-        if (top.hasAsyncFetch && !top.hasLoadingState) {
+
+        // Priority 1: Hook was used but loading field not destructured
+        if (top.hookFetchWithoutLoading) {
+          context.report({
+            node,
+            messageId: 'missingHookLoadingField',
+            data: { hookName: top.hookFetchWithoutLoading },
+          });
+        }
+        // Priority 2: General async fetch without any loading state
+        else if (top.hasAsyncFetch && !top.hasLoadingState) {
           context.report({ node, messageId: 'missingLoadingState' });
         }
       }
+    }
+
+    function checkHookDestructuring(
+      node: TSESTree.CallExpression,
+      hookName: string,
+      current: { hasAsyncFetch: boolean; hasLoadingState: boolean; hookFetchWithoutLoading: string | null },
+    ) {
+      current.hasAsyncFetch = true;
+
+      if (
+        node.parent?.type === 'VariableDeclarator' &&
+        node.parent.id.type === 'ObjectPattern'
+      ) {
+        let hasLoadingField = false;
+        for (const prop of node.parent.id.properties) {
+          if (
+            prop.type === 'Property' &&
+            prop.key.type === 'Identifier'
+          ) {
+            // Check original key name (before renaming via : alias)
+            if (HOOK_LOADING_FIELDS.has(prop.key.name)) {
+              hasLoadingField = true;
+              current.hasLoadingState = true;
+            }
+          }
+        }
+        // Hook was destructured but loading field was NOT included
+        if (!hasLoadingField) {
+          current.hookFetchWithoutLoading = hookName;
+        }
+      }
+      // Whole assignment: const mutation = useMutation(...)
+      // We still mark hasAsyncFetch, rely on useState fallback for now
     }
 
     return {
@@ -63,54 +123,17 @@ export default createRule({
         if (componentStack.length === 0) return;
         const current = componentStack[componentStack.length - 1];
 
-        // Check for async fetch calls
+        // Check for async fetch calls (generic: fetch, axios, etc.)
         if (isAsyncFetchCall(node)) {
           current.hasAsyncFetch = true;
         }
 
-        // Check for useQuery/useSWR/useInfiniteQuery destructured loading
+        // Check for data-fetching hooks
         if (
           node.callee.type === 'Identifier' &&
-          (node.callee.name === 'useQuery' || node.callee.name === 'useSWR' || node.callee.name === 'useInfiniteQuery')
+          DATA_FETCH_HOOKS.has(node.callee.name)
         ) {
-          current.hasAsyncFetch = true;
-          // Check if destructured with loading variable
-          if (
-            node.parent?.type === 'VariableDeclarator' &&
-            node.parent.id.type === 'ObjectPattern'
-          ) {
-            for (const prop of node.parent.id.properties) {
-              if (
-                prop.type === 'Property' &&
-                prop.key.type === 'Identifier' &&
-                isLoadingVariable(prop.key.name)
-              ) {
-                current.hasLoadingState = true;
-              }
-            }
-          }
-        }
-
-        // Check for useMutation destructured loading (isPending)
-        if (
-          node.callee.type === 'Identifier' &&
-          node.callee.name === 'useMutation'
-        ) {
-          current.hasAsyncFetch = true;
-          if (
-            node.parent?.type === 'VariableDeclarator' &&
-            node.parent.id.type === 'ObjectPattern'
-          ) {
-            for (const prop of node.parent.id.properties) {
-              if (
-                prop.type === 'Property' &&
-                prop.key.type === 'Identifier' &&
-                isLoadingVariable(prop.key.name)
-              ) {
-                current.hasLoadingState = true;
-              }
-            }
-          }
+          checkHookDestructuring(node, node.callee.name, current);
         }
       },
 
@@ -118,6 +141,7 @@ export default createRule({
         if (componentStack.length === 0) return;
         const current = componentStack[componentStack.length - 1];
 
+        // useState loading detection — only counts if no hook loading requirement
         const pair = extractUseStatePair(node);
         if (pair && isLoadingVariable(pair.state)) {
           current.hasLoadingState = true;
