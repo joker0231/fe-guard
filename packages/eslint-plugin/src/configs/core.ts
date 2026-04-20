@@ -31,6 +31,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/safe-json-parse': 'error',
     'fe-guard/no-raw-fetch': 'error',
     'fe-guard/no-immediate-mutation-on-input': 'error',
+    'fe-guard/require-form-validation': 'error',
     // 板块5 组件健壮
     'fe-guard/conditional-render-complete': 'error',
     'fe-guard/no-state-in-render': 'error',

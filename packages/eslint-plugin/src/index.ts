@@ -2,7 +2,7 @@
  * eslint-plugin-fe-guard
  *
  * ESLint plugin for Frontend Guard - AI代码编译级防御器
- * 75 ESLint rules (Core 64 error + Extended 11 error) + 14 Vite analyzer rules = 85 total
+ * 76 ESLint rules (Core 65 error + Extended 11 error) + 14 Vite analyzer rules = 90 total
  */
 
 // ── Board 1: Event Handler ──
@@ -30,6 +30,7 @@ import noGetWithBody from './rules/api-safety/no-get-with-body';
 import safeJsonParse from './rules/api-safety/safe-json-parse';
 import noRawFetch from './rules/api-safety/no-raw-fetch';
 import noImmediateMutationOnInput from './rules/api-safety/no-immediate-mutation-on-input';
+import requireFormValidation from './rules/api-safety/require-form-validation';
 
 // ── Board 5: Component ──
 import conditionalRenderComplete from './rules/component/conditional-render-complete';
@@ -141,6 +142,7 @@ const rules = {
   'safe-json-parse': safeJsonParse,
   'no-raw-fetch': noRawFetch,
   'no-immediate-mutation-on-input': noImmediateMutationOnInput,
+  'require-form-validation': requireFormValidation,
   // Board 5
   'conditional-render-complete': conditionalRenderComplete,
   'no-state-in-render': noStateInRender,
