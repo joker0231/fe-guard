@@ -63,6 +63,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/require-error-handler-on-events': 'error',
     'fe-guard/require-io-validation': 'error',
     'fe-guard/no-duplicate-type-definition': 'error',
+    'fe-guard/require-shared-schema': 'error',
     // 板块11 AI代码气味
     'fe-guard/no-placeholder-url': 'error',
     'fe-guard/no-todo-in-production': 'error',

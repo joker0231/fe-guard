@@ -70,6 +70,7 @@ import requireErrorHandlerOnEvents from './rules/error-handling/require-error-ha
 import noEmptyCatch from './rules/error-handling/no-empty-catch';
 import requireIoValidation from './rules/data-flow/require-io-validation';
 import noDuplicateTypeDefinition from './rules/data-flow/no-duplicate-type-definition';
+import requireSharedSchema from './rules/data-flow/require-shared-schema';
 
 // ── Board 11: AI Smell ──
 import noPlaceholderUrl from './rules/ai-smell/no-placeholder-url';
@@ -178,6 +179,7 @@ const rules = {
   'no-empty-catch': noEmptyCatch,
   'require-io-validation': requireIoValidation,
   'no-duplicate-type-definition': noDuplicateTypeDefinition,
+  'require-shared-schema': requireSharedSchema,
   // Board 11
   'no-placeholder-url': noPlaceholderUrl,
   'no-todo-in-production': noTodoInProduction,
