@@ -12,6 +12,9 @@ export default [
   {
     ignores: ['dist', 'node_modules', 'coverage', '*.config.js', '*.config.ts'],
   },
+  {
+    linterOptions: { noInlineConfig: true },
+  },
   js.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
