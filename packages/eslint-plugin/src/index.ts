@@ -66,6 +66,7 @@ import requireCleanupBindings from './rules/side-effects/require-cleanup-binding
 import noRawDangerouslySetInnerhtml from './rules/security/no-raw-dangerously-set-innerhtml';
 import noNativeFeedback from './rules/security/no-native-feedback';
 import noHardcodedSecret from './rules/security/no-hardcoded-secret';
+import noSensitiveStorage from './rules/security/no-sensitive-storage';
 import requireErrorHandlerOnEvents from './rules/error-handling/require-error-handler-on-events';
 import noEmptyCatch from './rules/error-handling/no-empty-catch';
 import requireIoValidation from './rules/data-flow/require-io-validation';
@@ -175,6 +176,7 @@ const rules = {
   'no-raw-dangerously-set-innerhtml': noRawDangerouslySetInnerhtml,
   'no-native-feedback': noNativeFeedback,
   'no-hardcoded-secret': noHardcodedSecret,
+  'no-sensitive-storage': noSensitiveStorage,
   'require-error-handler-on-events': requireErrorHandlerOnEvents,
   'no-empty-catch': noEmptyCatch,
   'require-io-validation': requireIoValidation,

@@ -60,6 +60,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/no-raw-dangerously-set-innerhtml': 'error',
     'fe-guard/no-native-feedback': 'error',
     'fe-guard/no-hardcoded-secret': 'error',
+    'fe-guard/no-sensitive-storage': 'error',
     'fe-guard/require-error-handler-on-events': 'error',
     'fe-guard/require-io-validation': 'error',
     'fe-guard/no-duplicate-type-definition': 'error',

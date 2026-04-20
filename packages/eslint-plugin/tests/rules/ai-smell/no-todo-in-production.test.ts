@@ -45,5 +45,35 @@ ruleTester.run('no-todo-in-production', rule, {
       code: `// HACK: temporary workaround`,
       errors: [{ messageId: 'todoComment' }],
     },
+    // Deferred promise - "will implement later"
+    {
+      code: `// Will implement later when API is ready`,
+      errors: [{ messageId: 'deferredPromise' }],
+    },
+    // Deferred promise - "implement later"
+    {
+      code: `/* implement later after refactor */`,
+      errors: [{ messageId: 'deferredPromise' }],
+    },
+    // Deferred promise - "fix later"
+    {
+      code: `// fix later when we have time`,
+      errors: [{ messageId: 'deferredPromise' }],
+    },
+    // Deferred promise - "skip for now"
+    {
+      code: `// skip for now, not critical`,
+      errors: [{ messageId: 'deferredPromise' }],
+    },
+    // Deferred promise - "not implemented"
+    {
+      code: `// not implemented yet`,
+      errors: [{ messageId: 'deferredPromise' }],
+    },
+    // Deferred promise - "come back to this"
+    {
+      code: `// come back to this after launch`,
+      errors: [{ messageId: 'deferredPromise' }],
+    },
   ],
 });
