@@ -79,26 +79,31 @@ export default createRule<Options, 'missingRouteExport' | 'wrongRouteExportType'
 
     let hasCorrectExport = false;
     let hasDefaultExportOfRoute = false;
-    const programNode: TSESTree.Program[] = [];
+    let hasWrongKindExport = false;
+    let programNode: TSESTree.Program | null = null;
 
     return {
       Program(node) {
-        programNode.push(node);
+        programNode = node;
       },
 
       // export const Route = ...
       ExportNamedDeclaration(node) {
         if (
           node.declaration &&
-          node.declaration.type === 'VariableDeclaration' &&
-          node.declaration.kind === 'const'
+          node.declaration.type === 'VariableDeclaration'
         ) {
           for (const declarator of node.declaration.declarations) {
             if (
               declarator.id.type === 'Identifier' &&
               declarator.id.name === requiredName
             ) {
-              hasCorrectExport = true;
+              if (node.declaration.kind === 'const') {
+                hasCorrectExport = true;
+              } else {
+                // export let Route or export var Route
+                hasWrongKindExport = true;
+              }
             }
           }
         }
@@ -127,13 +132,15 @@ export default createRule<Options, 'missingRouteExport' | 'wrongRouteExportType'
       },
 
       'Program:exit'() {
+        if (!programNode) return;
+
         if (hasCorrectExport) {
           return; // 正确导出，不报错
         }
 
-        if (hasDefaultExportOfRoute) {
+        if (hasWrongKindExport || hasDefaultExportOfRoute) {
           context.report({
-            node: programNode[0],
+            node: programNode,
             messageId: 'wrongRouteExportType',
             data: { requiredName },
           });
@@ -142,7 +149,7 @@ export default createRule<Options, 'missingRouteExport' | 'wrongRouteExportType'
 
         // 缺少导出
         context.report({
-          node: programNode[0],
+          node: programNode,
           messageId: 'missingRouteExport',
           data: { requiredName },
         });

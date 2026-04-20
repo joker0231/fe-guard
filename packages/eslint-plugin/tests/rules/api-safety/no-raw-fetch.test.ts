@@ -175,5 +175,20 @@ ruleTester2.run('no-raw-fetch (extended bypass detection)', rule2, {
       code: "const img = new Image(); img.src = '/track?event=view';",
       errors: [{ messageId: 'noImageBeacon' }],
     },
+    // ❌ Image beacon with non-standard variable name (P1-1 fix)
+    {
+      code: "const x = new Image(); x.src = '/track?event=click';",
+      errors: [{ messageId: 'noImageBeacon' }],
+    },
+    // ❌ Image beacon with arbitrary variable name
+    {
+      code: "const px = new Image(); px.src = '/analytics';",
+      errors: [{ messageId: 'noImageBeacon' }],
+    },
+    // ❌ globalThis.fetch (P2-1 fix)
+    {
+      code: "globalThis.fetch('/api/data');",
+      errors: [{ messageId: 'noRawFetch' }],
+    },
   ],
 });

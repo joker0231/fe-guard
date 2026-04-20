@@ -75,5 +75,25 @@ ruleTester.run('no-immediate-mutation-on-input', rule, {
       code: '<input onChange={(e) => { mutation.mutate({ title: e.target.value }); }} />',
       errors: [{ messageId: 'immediateMutation' }],
     },
+    // P1-3: ReturnStatement with mutation
+    {
+      code: '<input onChange={(e) => { return fetch("/api/update", { body: e.target.value }); }} />',
+      errors: [{ messageId: 'immediateMutation' }],
+    },
+    // P1-3: if-wrapped mutation (one level deep)
+    {
+      code: '<input onChange={(e) => { if (e.target.value) { api.patch("/tasks", { title: e.target.value }); } }} />',
+      errors: [{ messageId: 'immediateMutation' }],
+    },
+    // P1-2: property.name matching (client.fetch)
+    {
+      code: '<input onChange={(e) => { client.fetch("/api/update", { body: e.target.value }); }} />',
+      errors: [{ messageId: 'immediateMutation' }],
+    },
+    // P2-2: onInput with API call
+    {
+      code: '<input onInput={(e) => { fetch("/api/update", { body: e.target.value }); }} />',
+      errors: [{ messageId: 'immediateMutation' }],
+    },
   ],
 });

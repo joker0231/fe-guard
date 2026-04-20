@@ -166,6 +166,17 @@ export default createRule<Options, 'duplicateType'>({
           });
         }
       },
+
+      // enum Foo { ... }
+      TSEnumDeclaration(node: TSESTree.TSEnumDeclaration) {
+        if (sharedTypeSet.has(node.id.name)) {
+          context.report({
+            node: node.id,
+            messageId: 'duplicateType',
+            data: { typeName: node.id.name },
+          });
+        }
+      },
     };
   },
 });

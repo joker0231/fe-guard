@@ -79,14 +79,23 @@ ruleTester.run('enforce-route-export-convention', rule, {
       filename: '/project/src/routes/dashboard.tsx',
       errors: [{ messageId: 'missingRouteExport' }],
     },
-    // ❌ 用 let 而不是 const
+    // ❌ 用 let 而不是 const (P1-5: should report wrongRouteExportType)
     {
       code: `
         export let Route = createFileRoute('/dashboard')({ component: Dashboard });
         function Dashboard() { return <div/>; }
       `,
       filename: '/project/src/routes/dashboard.tsx',
-      errors: [{ messageId: 'missingRouteExport' }],
+      errors: [{ messageId: 'wrongRouteExportType' }],
+    },
+    // ❌ 用 var 而不是 const
+    {
+      code: `
+        export var Route = createFileRoute('/dashboard')({ component: Dashboard });
+        function Dashboard() { return <div/>; }
+      `,
+      filename: '/project/src/routes/dashboard.tsx',
+      errors: [{ messageId: 'wrongRouteExportType' }],
     },
   ],
 });

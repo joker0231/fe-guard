@@ -108,5 +108,14 @@ ruleTester.run('no-duplicate-type-definition', rule, {
       filename: '/project/src/lib/helpers.ts',
       errors: [{ messageId: 'duplicateType', data: { typeName: 'Task' } }],
     },
+    // P1-4: ❌ enum重定义
+    {
+      code: `
+        enum TaskStatus { TODO = 'todo', DONE = 'done' }
+      `,
+      options: [{ sharedTypeNames: ['TaskStatus'] }],
+      filename: '/project/src/routes/tasks.tsx',
+      errors: [{ messageId: 'duplicateType', data: { typeName: 'TaskStatus' } }],
+    },
   ],
 });

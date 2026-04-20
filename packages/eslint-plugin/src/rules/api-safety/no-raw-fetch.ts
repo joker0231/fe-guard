@@ -94,11 +94,11 @@ export default createRule<
           return;
         }
 
-        // window.fetch() call
+        // window.fetch() or globalThis.fetch() call
         if (
           node.callee.type === 'MemberExpression' &&
           node.callee.object.type === 'Identifier' &&
-          node.callee.object.name === 'window' &&
+          (node.callee.object.name === 'window' || node.callee.object.name === 'globalThis') &&
           node.callee.property.type === 'Identifier' &&
           node.callee.property.name === 'fetch'
         ) {
@@ -190,25 +190,21 @@ export default createRule<
           }
 
           // Check if assigning .src to a variable that was assigned new Image()
-          // This is a simplified check — we look at the variable name pattern
+          // No heuristic — check ALL variables for new Image() assignment
           if (node.left.object.type === 'Identifier') {
             const varName = node.left.object.name;
-            // Heuristic: variable names like img, image, pixel, beacon suggest Image usage
-            if (/^(img|image|pixel|beacon|tracker)/i.test(varName)) {
-              // Walk up to find if this variable was assigned new Image()
-              const scope = context.sourceCode.getScope(node);
-              const variable = scope.variables.find((v) => v.name === varName);
-              if (variable && variable.defs.length > 0) {
-                const def = variable.defs[0];
-                if (
-                  def.type === 'Variable' &&
-                  def.node.init &&
-                  def.node.init.type === 'NewExpression' &&
-                  def.node.init.callee.type === 'Identifier' &&
-                  def.node.init.callee.name === 'Image'
-                ) {
-                  context.report({ node, messageId: 'noImageBeacon' });
-                }
+            const scope = context.sourceCode.getScope(node);
+            const variable = scope.variables.find((v) => v.name === varName);
+            if (variable && variable.defs.length > 0) {
+              const def = variable.defs[0];
+              if (
+                def.type === 'Variable' &&
+                def.node.init &&
+                def.node.init.type === 'NewExpression' &&
+                def.node.init.callee.type === 'Identifier' &&
+                def.node.init.callee.name === 'Image'
+              ) {
+                context.report({ node, messageId: 'noImageBeacon' });
               }
             }
           }

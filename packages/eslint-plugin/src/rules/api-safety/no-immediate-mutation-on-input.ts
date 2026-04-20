@@ -45,18 +45,82 @@ function isMutationCall(
     return patterns.some((p) => callee.name.toLowerCase().includes(p.toLowerCase()));
   }
 
-  // Member call: api.patch(), httpClient.post(), mutation.mutate()
+  // Member call: api.patch(), httpClient.post(), mutation.mutate(), client.fetch()
   if (callee.type === 'MemberExpression') {
-    if (callee.object.type === 'Identifier') {
-      return patterns.some((p) => callee.object.type === 'Identifier' && callee.object.name.toLowerCase().includes(p.toLowerCase()));
-    }
+    const objName = callee.object.type === 'Identifier' ? callee.object.name : '';
+    const propName = callee.property.type === 'Identifier' ? callee.property.name : '';
+    return patterns.some((p) => objName.toLowerCase().includes(p.toLowerCase()))
+        || patterns.some((p) => propName.toLowerCase().includes(p.toLowerCase()));
   }
 
   return false;
 }
 
 /**
- * Find mutation calls in a function body (shallow — checks direct statements only)
+ * Check a single expression/statement for mutation calls
+ */
+function checkExprForMutation(
+  expr: TSESTree.Expression,
+  patterns: string[],
+  results: TSESTree.CallExpression[],
+): void {
+  if (expr.type === 'CallExpression' && isMutationCall(expr, patterns)) {
+    results.push(expr);
+  }
+  if (
+    expr.type === 'AwaitExpression' &&
+    expr.argument.type === 'CallExpression' &&
+    isMutationCall(expr.argument, patterns)
+  ) {
+    results.push(expr.argument);
+  }
+}
+
+/**
+ * Check statements for mutation calls (one level only, no deep recursion)
+ */
+function checkStatementsForMutations(
+  stmts: TSESTree.Statement[],
+  patterns: string[],
+  results: TSESTree.CallExpression[],
+  shallow?: boolean,
+): void {
+  for (const stmt of stmts) {
+    if (stmt.type === 'ExpressionStatement') {
+      checkExprForMutation(stmt.expression, patterns, results);
+    }
+    // Variable declaration: const res = fetch() / const res = await fetch()
+    if (stmt.type === 'VariableDeclaration') {
+      for (const decl of stmt.declarations) {
+        if (decl.init) {
+          checkExprForMutation(decl.init, patterns, results);
+        }
+      }
+    }
+    // ReturnStatement: return fetch(url)
+    if (stmt.type === 'ReturnStatement' && stmt.argument) {
+      checkExprForMutation(stmt.argument, patterns, results);
+    }
+    // IfStatement: one level shallow recursion into consequent/alternate
+    if (stmt.type === 'IfStatement' && !shallow) {
+      if (stmt.consequent.type === 'BlockStatement') {
+        checkStatementsForMutations(stmt.consequent.body, patterns, results, true);
+      } else if (stmt.consequent.type === 'ExpressionStatement') {
+        checkExprForMutation(stmt.consequent.expression, patterns, results);
+      }
+      if (stmt.alternate) {
+        if (stmt.alternate.type === 'BlockStatement') {
+          checkStatementsForMutations(stmt.alternate.body, patterns, results, true);
+        } else if (stmt.alternate.type === 'ExpressionStatement') {
+          checkExprForMutation(stmt.alternate.expression, patterns, results);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Find mutation calls in a function body (shallow — checks direct statements + one level if/return)
  */
 function findMutationCalls(
   node: TSESTree.Node,
@@ -72,42 +136,9 @@ function findMutationCalls(
     return results;
   }
 
-  // Case 2: BlockStatement — check direct statements
+  // Case 2: BlockStatement — check direct statements + ReturnStatement + IfStatement
   if (node.type === 'BlockStatement') {
-    for (const stmt of node.body) {
-      if (stmt.type === 'ExpressionStatement') {
-        const expr = stmt.expression;
-        // Direct call: fetch(), api.patch()
-        if (expr.type === 'CallExpression' && isMutationCall(expr, patterns)) {
-          results.push(expr);
-        }
-        // Await call: await fetch(), await api.patch()
-        if (
-          expr.type === 'AwaitExpression' &&
-          expr.argument.type === 'CallExpression' &&
-          isMutationCall(expr.argument, patterns)
-        ) {
-          results.push(expr.argument);
-        }
-      }
-      // Variable declaration: const res = fetch() / const res = await fetch()
-      if (stmt.type === 'VariableDeclaration') {
-        for (const decl of stmt.declarations) {
-          if (decl.init) {
-            if (decl.init.type === 'CallExpression' && isMutationCall(decl.init, patterns)) {
-              results.push(decl.init);
-            }
-            if (
-              decl.init.type === 'AwaitExpression' &&
-              decl.init.argument.type === 'CallExpression' &&
-              isMutationCall(decl.init.argument, patterns)
-            ) {
-              results.push(decl.init.argument);
-            }
-          }
-        }
-      }
-    }
+    checkStatementsForMutations(node.body, patterns, results);
   }
 
   return results;
@@ -136,7 +167,7 @@ export default createRule<Options, 'immediateMutation'>({
     ],
     messages: {
       immediateMutation:
-        '`onChange` 中直接调用了网络请求/mutation，每次输入变化都会触发请求。请使用 `debounce` 包装（推荐300-500ms延迟），或改为在 `onBlur` 时提交。',
+        '`onChange`/`onInput` 中直接调用了网络请求/mutation，每次输入变化都会触发请求。请使用 `debounce` 包装（推荐300-500ms延迟），或改为在 `onBlur` 时提交。',
     },
   },
   defaultOptions: [{}],
@@ -148,10 +179,10 @@ export default createRule<Options, 'immediateMutation'>({
 
     return {
       JSXAttribute(node) {
-        // Only check onChange
+        // Check onChange and onInput
         if (
           node.name.type !== 'JSXIdentifier' ||
-          node.name.name !== 'onChange'
+          (node.name.name !== 'onChange' && node.name.name !== 'onInput')
         ) {
           return;
         }
