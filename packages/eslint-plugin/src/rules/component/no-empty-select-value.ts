@@ -19,7 +19,7 @@ const createRule = ESLintUtils.RuleCreator(
 
 // 对象名关键词（包含任一即匹配）
 const OBJECT_KEYWORDS = [
-  'Select', 'Listbox', 'Combobox', 'Radio', 'Tab', 'Toggle', 'Primitive',
+  'Select', 'Listbox', 'Combobox', 'Radio', 'Tab', 'Toggle',
 ];
 
 // 属性名白名单（只有这些属性名会被检测）
@@ -43,9 +43,23 @@ const EXTRA_IDENTIFIERS = new Set([
   'ToggleGroupItem',
 ]);
 
+const DEFAULT_ALLOWED_FILES = [
+  '**/components/ui/**',
+];
+
+function matchGlob(filepath: string, pattern: string): boolean {
+  const regexStr = pattern
+    .replace(/\*\*/g, '<<GLOBSTAR>>')
+    .replace(/\*/g, '[^/]*')
+    .replace(/<<GLOBSTAR>>/g, '.*');
+  return new RegExp(regexStr).test(filepath);
+}
+
+type Options = [{ allowedFiles?: string[] }];
+
 type MessageIds = 'emptyValue' | 'missingValue' | 'emptyFallback';
 
-export default createRule<[], MessageIds>({
+export default createRule<Options, MessageIds>({
   name: 'no-empty-select-value',
   meta: {
     type: 'problem',
@@ -60,10 +74,28 @@ export default createRule<[], MessageIds>({
       emptyFallback:
         'value 中使用了 ?? "" �� || "" fallback 到空字符串，这会导致运行时错误。请在数据源过滤无效选项或提供有意义的默认值。',
     },
-    schema: [],
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          allowedFiles: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Glob patterns for files where this rule is skipped (e.g., UI wrapper components)',
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
   },
-  defaultOptions: [],
-  create(context) {
+  defaultOptions: [{}],
+  create(context, [options]) {
+    const allowedFiles = [...DEFAULT_ALLOWED_FILES, ...(options.allowedFiles ?? [])];
+    const filename = context.filename ?? context.getFilename();
+    if (allowedFiles.some((pattern) => matchGlob(filename, pattern))) {
+      return {};
+    }
+
     function isTargetElement(node: TSESTree.JSXOpeningElement): boolean {
       const { name } = node;
 

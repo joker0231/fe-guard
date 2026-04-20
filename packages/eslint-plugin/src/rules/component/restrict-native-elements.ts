@@ -1,13 +1,43 @@
-import { createRule } from '../../utils/rule-helpers';
+import { ESLintUtils, TSESTree } from '@typescript-eslint/utils';
+
+const createRule = ESLintUtils.RuleCreator(
+  (name) => `https://github.com/joker0231/fe-guard/blob/main/docs/rules/${name}.md`
+);
 
 const ALLOWED_NATIVE_ELEMENTS = new Set(['div']);
 
-export default createRule({
+const DEFAULT_ALLOWED_FILES = [
+  '**/components/ui/**',
+];
+
+function matchGlob(filepath: string, pattern: string): boolean {
+  const regexStr = pattern
+    .replace(/\*\*/g, '<<GLOBSTAR>>')
+    .replace(/\*/g, '[^/]*')
+    .replace(/<<GLOBSTAR>>/g, '.*');
+  return new RegExp(regexStr).test(filepath);
+}
+
+type Options = [{ allowedFiles?: string[] }];
+
+export default createRule<Options, 'restrictedElement'>({
   name: 'restrict-native-elements',
   meta: {
     type: 'problem',
     docs: { description: 'Only allow <div> as native HTML element; all others must use wrapped components' },
-    schema: [],
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          allowedFiles: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Glob patterns for files where native elements are allowed (e.g., UI component wrappers)',
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
     messages: {
       restrictedElement:
         '禁止使用原生<{{name}}>元素。请使用封装组件替代：\n' +
@@ -19,18 +49,22 @@ export default createRule({
         '<label> → <Label>，<ul>/<ol>/<li> → <List>/<ListItem>',
     },
   },
-  defaultOptions: [],
-  create(context) {
+  defaultOptions: [{}],
+  create(context, [options]) {
+    const allowedFiles = [...DEFAULT_ALLOWED_FILES, ...(options.allowedFiles ?? [])];
+    const filename = context.filename ?? context.getFilename();
+
+    if (allowedFiles.some((pattern) => matchGlob(filename, pattern))) {
+      return {};
+    }
+
     return {
-      JSXOpeningElement(node) {
+      JSXOpeningElement(node: TSESTree.JSXOpeningElement) {
         const nameNode = node.name;
-        // Only check simple JSX identifiers (not member expressions like Foo.Bar)
         if (nameNode.type !== 'JSXIdentifier') return;
 
         const name = nameNode.name;
-        // Native HTML elements start with lowercase
         if (name[0] !== name[0].toLowerCase() || name[0] === name[0].toUpperCase()) return;
-        // Additional guard: must start with a-z
         if (!/^[a-z]/.test(name)) return;
 
         if (!ALLOWED_NATIVE_ELEMENTS.has(name)) {

@@ -94,4 +94,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/controlled-or-uncontrolled': 'error',
     'fe-guard/require-debounce-throttle': 'error',
   },
+  linterOptions: {
+    noInlineConfig: true,
+  },
 };
