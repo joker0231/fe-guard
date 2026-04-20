@@ -23,6 +23,11 @@ tester.run('no-zero-debounce', rule, {
     // Not a debounce call
     { code: `const result = fetch('/api/data');` },
     { code: `const result = someFunction(handler, 0);` },
+    // Names containing "debounce" but not exact matches — should NOT trigger
+    { code: `setDebouncedValue(value);` },
+    { code: `const val = useDebounce(keyword, 300);` },
+    { code: `debouncedSearch(query);` },
+    { code: `const fn = createDebouncedHandler(handler, 0);` },
   ],
   invalid: [
     // Zero delay

@@ -1,22 +1,30 @@
 import { createRule } from '../../utils/rule-helpers';
 import type { TSESTree } from '@typescript-eslint/utils';
 
-const DEBOUNCE_NAMES = ['debounce', 'throttle', 'useDebouncedCallback', 'useThrottledCallback'];
+// Exact function names that are debounce/throttle wrappers
+const EXACT_DEBOUNCE_NAMES = new Set([
+  'debounce', 'throttle',
+  'useDebouncedCallback', 'useThrottledCallback',
+]);
+
+// Exact member property names (_.debounce, lodash.throttle)
+const EXACT_MEMBER_NAMES = new Set(['debounce', 'throttle']);
 
 /**
- * Check if a callee matches debounce/throttle function names
+ * Check if a callee matches debounce/throttle function names.
+ * Uses EXACT match to avoid false positives on names like setDebouncedValue, useDebounce, etc.
  */
 function isDebounceCall(node: TSESTree.CallExpression): boolean {
   const { callee } = node;
 
-  // Direct call: debounce(fn, 0)
+  // Direct call: debounce(fn, 0), throttle(fn, 0)
   if (callee.type === 'Identifier') {
-    return DEBOUNCE_NAMES.some((n) => callee.name.toLowerCase().includes(n.toLowerCase()));
+    return EXACT_DEBOUNCE_NAMES.has(callee.name);
   }
 
-  // Member call: _.debounce(fn, 0), lodash.debounce(fn, 0)
+  // Member call: _.debounce(fn, 0), lodash.throttle(fn, 0)
   if (callee.type === 'MemberExpression' && callee.property.type === 'Identifier') {
-    return DEBOUNCE_NAMES.some((n) => callee.property.type === 'Identifier' && callee.property.name.toLowerCase().includes(n.toLowerCase()));
+    return EXACT_MEMBER_NAMES.has(callee.property.name);
   }
 
   return false;
