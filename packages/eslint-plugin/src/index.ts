@@ -39,6 +39,7 @@ import noStateInRender from './rules/component/no-state-in-render';
 import noRecursiveWithoutBase from './rules/component/no-recursive-without-base';
 import restrictNativeElements from './rules/component/restrict-native-elements';
 import noInlineComponentDefinition from './rules/component/no-inline-component-definition';
+import noEmptySelectValue from './rules/component/no-empty-select-value';
 
 // ── Board 6: State Management ──
 import noStateMutation from './rules/state-management/no-state-mutation';
@@ -151,6 +152,7 @@ const rules = {
   'no-recursive-without-base': noRecursiveWithoutBase,
   'restrict-native-elements': restrictNativeElements,
   'no-inline-component-definition': noInlineComponentDefinition,
+  'no-empty-select-value': noEmptySelectValue,
   // Board 6
   'no-state-mutation': noStateMutation,
   'require-lazy-state-init': requireLazyStateInit,

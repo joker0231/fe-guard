@@ -39,6 +39,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/no-recursive-without-base': 'error',
     'fe-guard/restrict-native-elements': 'error',
     'fe-guard/no-inline-component-definition': 'error',
+    'fe-guard/no-empty-select-value': 'error',
     // 板块6 状态管理
     'fe-guard/no-state-mutation': 'error',
     // 板块7 渲染安全
