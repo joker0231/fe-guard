@@ -95,6 +95,8 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/async-handler-try-catch': 'error',
     'fe-guard/controlled-or-uncontrolled': 'error',
     'fe-guard/require-debounce-throttle': 'error',
+    // 板块17 标准ESLint推荐
+    'eqeqeq': 'error',
   },
   linterOptions: {
     noInlineConfig: true,
