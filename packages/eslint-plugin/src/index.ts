@@ -29,6 +29,8 @@ import responseNullCheck from './rules/api-safety/response-null-check';
 import apiTimeout from './rules/api-safety/api-timeout';
 import noGetWithBody from './rules/api-safety/no-get-with-body';
 import safeJsonParse from './rules/api-safety/safe-json-parse';
+import requireUrlEncoding from './rules/api-safety/require-url-encoding';
+import requireQueryMutationForRequests from './rules/api-safety/require-query-mutation-for-requests';
 import noRawFetch from './rules/api-safety/no-raw-fetch';
 import noImmediateMutationOnInput from './rules/api-safety/no-immediate-mutation-on-input';
 import requireFormValidation from './rules/api-safety/require-form-validation';
@@ -149,6 +151,8 @@ const rules = {
   'api-timeout': apiTimeout,
   'no-get-with-body': noGetWithBody,
   'safe-json-parse': safeJsonParse,
+  'require-url-encoding': requireUrlEncoding,
+  'require-query-mutation-for-requests': requireQueryMutationForRequests,
   'no-raw-fetch': noRawFetch,
   'no-immediate-mutation-on-input': noImmediateMutationOnInput,
   'require-form-validation': requireFormValidation,
