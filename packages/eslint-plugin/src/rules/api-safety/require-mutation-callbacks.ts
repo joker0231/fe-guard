@@ -1,5 +1,5 @@
 import { TSESTree } from '@typescript-eslint/utils';
-import { createRule } from '../../utils/create-rule';
+import { createRule } from '../../utils/rule-helpers';
 
 type MessageIds = 'missingOnError' | 'missingOnSuccess';
 

@@ -88,7 +88,18 @@ ruleTester.run('require-loading-state', rule, {
         }
       `,
     },
+    // useRef for non-loading purpose (e.g. inputRef, scrollRef) — no error
+    {
+      code: `
+        function SearchBox() {
+          const inputRef = useRef(null);
+          const { data, isLoading } = useQuery(['search'], fetchSearch);
+          return <input ref={inputRef} />;
+        }
+      `,
+    },
   ],
+
   invalid: [
     // No loading state at all
     {
@@ -143,5 +154,43 @@ ruleTester.run('require-loading-state', rule, {
       `,
       errors: [{ messageId: 'missingHookLoadingField' }],
     },
+    // useRef for loading anti-pattern
+    {
+      code: `
+        function SubmitForm() {
+          const loadingRef = useRef(false);
+          const handleSubmit = async () => {
+            loadingRef.current = true;
+            await fetch('/api/submit');
+            loadingRef.current = false;
+          };
+          return <button onClick={handleSubmit}>Submit</button>;
+        }
+      `,
+      errors: [{ messageId: 'missingLoadingState' }, { messageId: 'useRefForLoading' }],
+    },
+    // useRef with isLoading name
+    {
+      code: `
+        function DataLoader() {
+          const isLoadingRef = useRef(false);
+          useEffect(() => { fetch('/api/data'); }, []);
+          return <div>Content</div>;
+        }
+      `,
+      errors: [{ messageId: 'missingLoadingState' }, { messageId: 'useRefForLoading' }],
+    },
+    // useRef with submitting name
+    {
+      code: `
+        function CreateTask() {
+          const isSubmitting = useRef(false);
+          const { mutateAsync } = useMutation({ mutationFn: createTask });
+          return <button onClick={() => mutateAsync()}>Create</button>;
+        }
+      `,
+      errors: [{ messageId: 'missingHookLoadingField' }, { messageId: 'useRefForLoading' }],
+    },
   ],
+
 });

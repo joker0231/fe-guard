@@ -2,6 +2,9 @@ import { createRule } from '../../utils/rule-helpers';
 import { isAsyncFetchCall, isLoadingVariable, extractUseStatePair } from '../../utils/react-helpers';
 import type { TSESTree } from '@typescript-eslint/utils';
 
+// Patterns that indicate a ref is being used for loading state
+const LOADING_REF_PATTERNS = /loading|isLoading|isFetching|isPending|submitting|isSubmitting/i;
+
 // Known loading fields from popular hooks
 const HOOK_LOADING_FIELDS = new Set([
   'isPending', 'isLoading', 'isFetching', 'isRefetching', 'status',
@@ -23,6 +26,8 @@ export default createRule({
         "组件有异步数据获取但缺少loading状态处理。数据加载期间用户看到空白。请添加loading状态：1) `const [loading, setLoading] = useState(true)` + 条件渲染；2) 或使用 `useQuery` 的 `isLoading`；3) 或用 `<Suspense fallback={<Loading />}>` 包裹。",
       missingHookLoadingField:
         "使用了 {{hookName}} 但未解构其内置 loading 状态字段（如 isPending/isLoading）。请直接从 hook 解构中获取 loading 状态，而非自行用 useState 管理。",
+      useRefForLoading:
+        "使用 useRef 管理 loading 状态（'{{refName}}'）不会触发组件重渲染，用户看不到 loading 状态变化。请改用 useState 或使用 useQuery/useMutation 的内置 isPending。",
     },
   },
   defaultOptions: [],
@@ -33,6 +38,9 @@ export default createRule({
       hasLoadingState: boolean;
       // Track hook-specific loading: hook was destructured but loading field missing
       hookFetchWithoutLoading: string | null; // hook name, or null
+      // Track useRef for loading anti-pattern
+      loadingRefName: string | null;
+      loadingRefNode: TSESTree.Node | null;
       node: TSESTree.Node;
     }> = [];
 
@@ -52,6 +60,8 @@ export default createRule({
           hasAsyncFetch: false,
           hasLoadingState: false,
           hookFetchWithoutLoading: null,
+          loadingRefName: null,
+          loadingRefNode: null,
           node,
         });
       }
@@ -62,6 +72,15 @@ export default createRule({
       const top = componentStack[componentStack.length - 1];
       if (top.node === node) {
         componentStack.pop();
+
+        // Priority 0: useRef for loading anti-pattern — always report if detected
+        if (top.loadingRefName && top.loadingRefNode) {
+          context.report({
+            node: top.loadingRefNode,
+            messageId: 'useRefForLoading',
+            data: { refName: top.loadingRefName },
+          });
+        }
 
         // Priority 1: Hook was used but loading field not destructured
         if (top.hookFetchWithoutLoading) {
@@ -76,6 +95,7 @@ export default createRule({
           context.report({ node, messageId: 'missingLoadingState' });
         }
       }
+
     }
 
     function checkHookDestructuring(
@@ -146,7 +166,21 @@ export default createRule({
         if (pair && isLoadingVariable(pair.state)) {
           current.hasLoadingState = true;
         }
+
+        // useRef loading anti-pattern detection
+        // e.g. const loadingRef = useRef(false)
+        if (
+          node.id.type === 'Identifier' &&
+          LOADING_REF_PATTERNS.test(node.id.name) &&
+          node.init?.type === 'CallExpression' &&
+          node.init.callee.type === 'Identifier' &&
+          node.init.callee.name === 'useRef'
+        ) {
+          current.loadingRefName = node.id.name;
+          current.loadingRefNode = node;
+        }
       },
+
     };
   },
 });

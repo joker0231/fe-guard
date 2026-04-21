@@ -23,6 +23,12 @@ ruleTester.run('no-enum-raw-render', rule, {
     { code: '<span>{`Hello ${user.name}`}</span>' },
     // Template literal with mapped enum
     { code: '<span>{`Status: ${statusMap[task.status]}`}</span>' },
+    // String() wrapping with non-enum field
+    { code: '<span>{String(item.name)}</span>' },
+    // toString() on non-enum field
+    { code: '<span>{item.name.toString()}</span>' },
+    // String() wrapping with mapped enum
+    { code: '<span>{String(statusMap[task.status])}</span>' },
   ],
   invalid: [
     {
@@ -50,6 +56,21 @@ ruleTester.run('no-enum-raw-render', rule, {
     // Template literal with enum in div
     {
       code: '<div>{`Role: ${user.role}`}</div>',
+      errors: [{ messageId: 'enumRawRender' }],
+    },
+    // String() wrapping enum field
+    {
+      code: '<span>{String(task.status)}</span>',
+      errors: [{ messageId: 'enumRawRender' }],
+    },
+    // toString() on enum field
+    {
+      code: '<span>{task.status.toString()}</span>',
+      errors: [{ messageId: 'enumRawRender' }],
+    },
+    // String() wrapping in template literal context
+    {
+      code: '<div>{String(order.priority)}</div>',
       errors: [{ messageId: 'enumRawRender' }],
     },
   ],

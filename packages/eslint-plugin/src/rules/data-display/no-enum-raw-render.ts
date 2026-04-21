@@ -18,12 +18,19 @@ export default createRule({
   },
   defaultOptions: [],
   create(context) {
+    function isEnumMemberExpression(node: TSESTree.Node): node is TSESTree.MemberExpression {
+      return (
+        node.type === 'MemberExpression' &&
+        !node.computed &&
+        node.property.type === 'Identifier' &&
+        ENUM_KEYWORDS.has(node.property.name.toLowerCase())
+      );
+    }
+
     return {
       // Case 1: Direct enum field in JSX - e.g. {task.status}
       'JSXExpressionContainer > MemberExpression'(node: TSESTree.MemberExpression) {
-        if (node.computed) return;
-        if (node.property.type !== 'Identifier') return;
-        if (!ENUM_KEYWORDS.has(node.property.name.toLowerCase())) return;
+        if (!isEnumMemberExpression(node)) return;
 
         const expression = context.sourceCode.getText(node);
         context.report({ node, messageId: 'enumRawRender', data: { expression } });
@@ -33,15 +40,38 @@ export default createRule({
       // e.g. {`Status: ${task.status}`}
       'JSXExpressionContainer > TemplateLiteral'(node: TSESTree.TemplateLiteral) {
         for (const expr of node.expressions) {
-          if (
-            expr.type === 'MemberExpression' &&
-            !expr.computed &&
-            expr.property.type === 'Identifier' &&
-            ENUM_KEYWORDS.has(expr.property.name.toLowerCase())
-          ) {
+          if (isEnumMemberExpression(expr)) {
             const expression = context.sourceCode.getText(expr);
             context.report({ node: expr, messageId: 'enumRawRender', data: { expression } });
           }
+        }
+      },
+
+      // Case 3: String(task.status) wrapping in JSX
+      // e.g. {String(task.status)}
+      'JSXExpressionContainer > CallExpression'(node: TSESTree.CallExpression) {
+        // String(task.status)
+        if (
+          node.callee.type === 'Identifier' &&
+          node.callee.name === 'String' &&
+          node.arguments.length === 1 &&
+          isEnumMemberExpression(node.arguments[0])
+        ) {
+          const expression = context.sourceCode.getText(node.arguments[0]);
+          context.report({ node, messageId: 'enumRawRender', data: { expression } });
+          return;
+        }
+
+        // task.status.toString()
+        if (
+          node.callee.type === 'MemberExpression' &&
+          !node.callee.computed &&
+          node.callee.property.type === 'Identifier' &&
+          node.callee.property.name === 'toString' &&
+          isEnumMemberExpression(node.callee.object)
+        ) {
+          const expression = context.sourceCode.getText(node.callee.object);
+          context.report({ node, messageId: 'enumRawRender', data: { expression } });
         }
       },
     };
