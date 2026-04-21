@@ -16,6 +16,15 @@ function isLocationMember(node: TSESTree.MemberExpression, prop: string): boolea
       return true;
     }
   }
+  // Bare location.prop (without window./document. prefix)
+  if (
+    node.object.type === 'Identifier' &&
+    node.object.name === 'location' &&
+    node.property.type === 'Identifier' &&
+    node.property.name === prop
+  ) {
+    return true;
+  }
   return false;
 }
 
@@ -74,20 +83,38 @@ export default createRule({
         }
       },
 
-      // window.location.assign(...) / window.location.replace(...)
+      // window.location.assign(...) / window.location.replace(...) / location.assign(...) / location.replace(...)
       CallExpression(node) {
         if (node.callee.type !== 'MemberExpression') return;
         const callee = node.callee;
 
         if (
-          callee.object.type === 'MemberExpression' &&
-          callee.object.property.type === 'Identifier' &&
-          callee.object.property.name === 'location' &&
           callee.property.type === 'Identifier' &&
           (callee.property.name === 'assign' || callee.property.name === 'replace')
         ) {
-          const obj = callee.object.object;
-          if (obj.type === 'Identifier' && (obj.name === 'window' || obj.name === 'document')) {
+          let isLocationCall = false;
+
+          // window.location.assign() / document.location.assign()
+          if (
+            callee.object.type === 'MemberExpression' &&
+            callee.object.property.type === 'Identifier' &&
+            callee.object.property.name === 'location'
+          ) {
+            const obj = callee.object.object;
+            if (obj.type === 'Identifier' && (obj.name === 'window' || obj.name === 'document')) {
+              isLocationCall = true;
+            }
+          }
+
+          // Bare location.assign() / location.replace()
+          if (
+            callee.object.type === 'Identifier' &&
+            callee.object.name === 'location'
+          ) {
+            isLocationCall = true;
+          }
+
+          if (isLocationCall) {
             const arg = node.arguments[0];
             if (arg?.type === 'Literal' && typeof arg.value === 'string' && isExternalUrl(arg.value)) {
               return;
