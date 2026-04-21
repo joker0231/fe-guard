@@ -25,9 +25,11 @@ tester.run('no-zero-debounce', rule, {
     { code: `const result = someFunction(handler, 0);` },
     // Names containing "debounce" but not exact matches — should NOT trigger
     { code: `setDebouncedValue(value);` },
-    { code: `const val = useDebounce(keyword, 300);` },
     { code: `debouncedSearch(query);` },
     { code: `const fn = createDebouncedHandler(handler, 0);` },
+    // useDebounce/useThrottle hooks with valid delay
+    { code: `const val = useDebounce(keyword, 300);` },
+    { code: `const val = useThrottle(scroll, 150);` },
   ],
   invalid: [
     // Zero delay
@@ -71,6 +73,26 @@ tester.run('no-zero-debounce', rule, {
     // Lodash throttle missing delay
     {
       code: `const fn = _.throttle(handler);`,
+      errors: [{ messageId: 'missingDelay' }],
+    },
+    // useDebounce hook with zero delay
+    {
+      code: `const val = useDebounce(keyword, 0);`,
+      errors: [{ messageId: 'zeroDebounce' }],
+    },
+    // useDebounce hook with small delay
+    {
+      code: `const val = useDebounce(keyword, 10);`,
+      errors: [{ messageId: 'zeroDebounce' }],
+    },
+    // useThrottle hook with zero delay
+    {
+      code: `const val = useThrottle(scroll, 0);`,
+      errors: [{ messageId: 'zeroDebounce' }],
+    },
+    // useDebounce missing delay
+    {
+      code: `const val = useDebounce(keyword);`,
       errors: [{ messageId: 'missingDelay' }],
     },
   ],

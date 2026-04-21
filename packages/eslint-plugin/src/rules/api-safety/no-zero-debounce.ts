@@ -5,6 +5,7 @@ import type { TSESTree } from '@typescript-eslint/utils';
 const EXACT_DEBOUNCE_NAMES = new Set([
   'debounce', 'throttle',
   'useDebouncedCallback', 'useThrottledCallback',
+  'useDebounce', 'useThrottle',
 ]);
 
 // Exact member property names (_.debounce, lodash.throttle)

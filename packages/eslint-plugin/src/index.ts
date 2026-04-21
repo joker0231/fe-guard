@@ -68,6 +68,7 @@ import noRawDangerouslySetInnerhtml from './rules/security/no-raw-dangerously-se
 import noNativeFeedback from './rules/security/no-native-feedback';
 import noHardcodedSecret from './rules/security/no-hardcoded-secret';
 import noSensitiveStorage from './rules/security/no-sensitive-storage';
+import requirePasswordInputType from './rules/security/require-password-input-type';
 import requireErrorHandlerOnEvents from './rules/error-handling/require-error-handler-on-events';
 import noEmptyCatch from './rules/error-handling/no-empty-catch';
 import requireIoValidation from './rules/data-flow/require-io-validation';
@@ -180,6 +181,7 @@ const rules = {
   'no-native-feedback': noNativeFeedback,
   'no-hardcoded-secret': noHardcodedSecret,
   'no-sensitive-storage': noSensitiveStorage,
+  'require-password-input-type': requirePasswordInputType,
   'require-error-handler-on-events': requireErrorHandlerOnEvents,
   'no-empty-catch': noEmptyCatch,
   'require-io-validation': requireIoValidation,
