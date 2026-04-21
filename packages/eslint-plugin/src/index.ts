@@ -57,6 +57,7 @@ import noUnstableKey from './rules/render-safety/no-unstable-key';
 import noAsyncEffect from './rules/async-safety/no-async-effect';
 import awaitInTry from './rules/async-safety/await-in-try';
 import noFloatingPromise from './rules/async-safety/no-floating-promise';
+import requireFetchAbort from './rules/async-safety/require-fetch-abort';
 
 // ── Board 9: Side Effects ──
 import noEffectSetStateLoop from './rules/side-effects/no-effect-set-state-loop';
@@ -172,6 +173,7 @@ const rules = {
   'no-async-effect': noAsyncEffect,
   'await-in-try': awaitInTry,
   'no-floating-promise': noFloatingPromise,
+  'require-fetch-abort': requireFetchAbort,
   // Board 9
   'no-effect-set-state-loop': noEffectSetStateLoop,
   'no-unnecessary-effect': noUnnecessaryEffect,

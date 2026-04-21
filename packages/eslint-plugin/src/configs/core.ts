@@ -52,6 +52,7 @@ export const core: TSESLint.FlatConfig.Config = {
     'fe-guard/no-async-effect': 'error',
     'fe-guard/await-in-try': 'error',
     'fe-guard/no-floating-promise': 'error',
+    'fe-guard/require-fetch-abort': 'error',
     // 板块9 副作用与资源清理
     'fe-guard/no-effect-set-state-loop': 'error',
     'fe-guard/no-unnecessary-effect': 'error',
