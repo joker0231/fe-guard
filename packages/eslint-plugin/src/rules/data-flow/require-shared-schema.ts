@@ -1,7 +1,7 @@
 import { createRule } from '../../utils/rule-helpers';
 import type { TSESTree } from '@typescript-eslint/utils';
 
-type MessageIds = 'localApiSchema' | 'inlineFieldSchema';
+type MessageIds = 'localApiSchema' | 'inlineFieldSchema' | 'standaloneFieldSchema';
 type Options = [
   {
     /** Additional variable name patterns to match (regex strings) */
@@ -218,6 +218,10 @@ export default createRule<Options, MessageIds>({
         'Field "{{fieldName}}" has inline validation ({{validations}}). ' +
         'Import a shared field schema from shared/ instead. ' +
         'Check shared/ for an existing "{{fieldName}}Schema" first; create one in shared/ only if not found.',
+      standaloneFieldSchema:
+        'Field schema "{{name}}" has business validation ({{validations}}). ' +
+        'Define it in shared/ and import. ' +
+        'Check shared/ for an existing schema first; create one in shared/ only if not found.',
     },
     schema: [
       {
@@ -272,7 +276,25 @@ export default createRule<Options, MessageIds>({
 
         // Find z.object() - may be wrapped in .refine()/.transform()/.pipe() etc.
         const zodObjectCall = findZodObjectInChain(callExpr);
-        if (!zodObjectCall) return;
+
+        // --- New check: standaloneFieldSchema ---
+        // Detect standalone field-level schemas like: const passwordSchema = z.string().min(6)
+        if (!zodObjectCall) {
+          if (isZodPrimitiveChain(callExpr)) {
+            const validations = findBusinessValidations(callExpr);
+            if (validations.length > 0) {
+              context.report({
+                node: node.id,
+                messageId: 'standaloneFieldSchema',
+                data: {
+                  name: varName,
+                  validations: validations.join(', '),
+                },
+              });
+            }
+          }
+          return;
+        }
 
         const { isZodObject, fieldCount } = isZodObjectCall(zodObjectCall);
         if (!isZodObject) return;

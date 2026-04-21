@@ -225,5 +225,53 @@ tester.run('require-shared-schema', rule, {
         { messageId: 'inlineFieldSchema', data: { fieldName: 'age', validations: 'min(18)' } },
       ],
     },
+    // ★ standaloneFieldSchema: standalone z.string().min(6)
+    {
+      code: `const passwordSchema = z.string().min(6);`,
+      filename: 'src/routes/login.tsx',
+      errors: [
+        { messageId: 'standaloneFieldSchema', data: { name: 'passwordSchema', validations: 'min(6)' } },
+      ],
+    },
+    // ★ standaloneFieldSchema: standalone z.string().email()
+    {
+      code: `const emailValidator = z.string().email();`,
+      filename: 'src/utils/validators.ts',
+      errors: [
+        { messageId: 'standaloneFieldSchema', data: { name: 'emailValidator', validations: 'email' } },
+      ],
+    },
+    // ★ standaloneFieldSchema: standalone z.number().min(18).max(120)
+    {
+      code: `const ageSchema = z.number().min(18).max(120);`,
+      filename: 'src/schemas/user.ts',
+      errors: [
+        { messageId: 'standaloneFieldSchema', data: { name: 'ageSchema', validations: 'max, min(18)' } },
+      ],
+    },
+    // ★ standaloneFieldSchema: z.string().regex() standalone
+    {
+      code: `const phoneSchema = z.string().regex(/^1[3-9]\\d{9}$/);`,
+      filename: 'src/routes/profile.tsx',
+      errors: [
+        { messageId: 'standaloneFieldSchema', data: { name: 'phoneSchema', validations: 'regex' } },
+      ],
+    },
+    // ★ standaloneFieldSchema: z.string().url() standalone
+    {
+      code: `const websiteSchema = z.string().url();`,
+      filename: 'src/routes/settings.tsx',
+      errors: [
+        { messageId: 'standaloneFieldSchema', data: { name: 'websiteSchema', validations: 'url' } },
+      ],
+    },
+    // ★ standaloneFieldSchema: z.string().min(3).optional() — optional doesn't exempt
+    {
+      code: `const nicknameField = z.string().min(3).optional();`,
+      filename: 'src/routes/profile.tsx',
+      errors: [
+        { messageId: 'standaloneFieldSchema', data: { name: 'nicknameField', validations: 'min(3)' } },
+      ],
+    },
   ],
 });
