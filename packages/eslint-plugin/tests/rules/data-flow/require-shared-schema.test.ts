@@ -45,6 +45,37 @@ tester.run('require-shared-schema', rule, {
       code: `const createTaskSchema = z.string();`,
       filename: 'src/routes/tasks.tsx',
     },
+    // --- inlineFieldSchema: valid cases ---
+    // .min(1) is "required" semantics, not business validation
+    {
+      code: `const formSchema = z.object({ name: z.string().min(1, 'Required') });`,
+      filename: 'src/routes/form.tsx',
+    },
+    // No validation chain - plain z.string()
+    {
+      code: `const formSchema = z.object({ name: z.string(), age: z.number() });`,
+      filename: 'src/routes/form.tsx',
+    },
+    // .optional() / .nullable() alone are not business validation
+    {
+      code: `const formSchema = z.object({ bio: z.string().optional(), score: z.number().nullable() });`,
+      filename: 'src/routes/form.tsx',
+    },
+    // Field uses imported schema variable (not inline)
+    {
+      code: `const formSchema = z.object({ password: passwordSchema, email: emailSchema });`,
+      filename: 'src/routes/form.tsx',
+    },
+    // In shared/ directory - skip even with inline validation
+    {
+      code: `const authSchema = z.object({ password: z.string().min(6) });`,
+      filename: 'shared/schemas/auth.ts',
+    },
+    // In server/ directory - skip
+    {
+      code: `const authSchema = z.object({ password: z.string().min(6) });`,
+      filename: 'server/routes/auth.ts',
+    },
   ],
   invalid: [
     // API schema defined locally - createTaskSchema
@@ -90,6 +121,109 @@ tester.run('require-shared-schema', rule, {
       code: `const fetchUserParams = z.object({ id: z.string() });`,
       filename: 'src/hooks/use-user.ts',
       errors: [{ messageId: 'localApiSchema', data: { name: 'fetchUserParams' } }],
+    },
+    // --- inlineFieldSchema: invalid cases ---
+    // password with .min(6) - business validation
+    {
+      code: `const loginSchema = z.object({ email: z.string().email(), password: z.string().min(6) });`,
+      filename: 'src/routes/login.tsx',
+      errors: [
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'email', validations: 'email' } },
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'password', validations: 'min(6)' } },
+      ],
+    },
+    // password with .min(3) and .max(100)
+    {
+      code: `const registerSchema = z.object({ password: z.string().min(3).max(100) });`,
+      filename: 'src/routes/register.tsx',
+      errors: [
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'password', validations: 'max, min(3)' } },
+      ],
+    },
+    // .regex() is business validation
+    {
+      code: `const formSchema = z.object({ phone: z.string().regex(/^1[3-9]\\d{9}$/) });`,
+      filename: 'src/routes/contact.tsx',
+      errors: [
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'phone', validations: 'regex' } },
+      ],
+    },
+    // .url() is business validation
+    {
+      code: `const formSchema = z.object({ website: z.string().url() });`,
+      filename: 'src/routes/profile.tsx',
+      errors: [
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'website', validations: 'url' } },
+      ],
+    },
+    // .min(6).optional() - optional doesn't exempt business validation
+    {
+      code: `const formSchema = z.object({ nickname: z.string().min(2).optional() });`,
+      filename: 'src/routes/settings.tsx',
+      errors: [
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'nickname', validations: 'min(2)' } },
+      ],
+    },
+    // number with .int().positive()
+    {
+      code: `const formSchema = z.object({ age: z.number().int().positive() });`,
+      filename: 'src/routes/profile.tsx',
+      errors: [
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'age', validations: 'positive, int' } },
+      ],
+    },
+    // .length(10) is business validation (> 1)
+    {
+      code: `const formSchema = z.object({ code: z.string().length(10) });`,
+      filename: 'src/routes/verify.tsx',
+      errors: [
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'code', validations: 'length(10)' } },
+      ],
+    },
+    // Mixed: localApiSchema + inlineFieldSchema on same z.object
+    {
+      code: `const createUserSchema = z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        password: z.string().min(8),
+        age: z.number().int(),
+      });`,
+      filename: 'src/routes/users.tsx',
+      errors: [
+        { messageId: 'localApiSchema', data: { name: 'createUserSchema' } },
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'email', validations: 'email' } },
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'password', validations: 'min(8)' } },
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'age', validations: 'int' } },
+      ],
+    },
+    // z.object wrapped in .refine() - should still detect inline field schemas
+    {
+      code: `const registerSchema = z.object({
+        name: z.string().min(1).max(100),
+        email: z.string().email(),
+        password: z.string().min(3),
+        confirmPassword: z.string(),
+      }).refine((data) => data.password === data.confirmPassword, {
+        message: 'Passwords must match',
+        path: ['confirmPassword'],
+      });`,
+      filename: 'src/routes/register.tsx',
+      errors: [
+        { messageId: 'localApiSchema', data: { name: 'registerSchema' } },
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'name', validations: 'max' } },
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'email', validations: 'email' } },
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'password', validations: 'min(3)' } },
+      ],
+    },
+    // z.object wrapped in .transform() - should still detect
+    {
+      code: `const formSchema = z.object({
+        age: z.number().min(18),
+      }).transform(data => ({ ...data, isAdult: true }));`,
+      filename: 'src/routes/profile.tsx',
+      errors: [
+        { messageId: 'inlineFieldSchema', data: { fieldName: 'age', validations: 'min(18)' } },
+      ],
     },
   ],
 });
